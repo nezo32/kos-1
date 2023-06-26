@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  background: var(--background);
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    /* width of the entire scrollbar */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: white;
+    /* color of the tracking area */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #303030;
+    /* color of the scroll thumb */
+  }
+}
+
+.viewpoint {
+  margin: 0 auto;
+  max-width: 1290px;
+  width: 100%;
+}
