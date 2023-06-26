@@ -6,17 +6,40 @@ const router = createRouter({
     {
       path: '/',
       name: 'Программы',
-      component: () => import('@/views/HomeView.vue')
+      component: () => import('@/Bridge.vue'),
+      redirect: '/main',
+      children: [
+        {
+          path: 'main',
+          name: 'Программы',
+          component: () => import('@/views/HomeView.vue'),
+          meta: {
+            breadcrumbs: "Программы"
+          },
+          alias: '/'
+        },
+        {
+          path: 'programs/:id',
+          name: "Образовательная программа",
+          component: () => import("@/views/EduProgramView.vue")
+        }
+      ]
     },
     {
       path: '/op_supervisors',
       name: 'Руководители ОП',
-      component: () => import('@/views/OPSupervisorsView.vue')
+      component: () => import('@/views/OPSupervisorsView.vue'),
+      meta: {
+        breadcrumbs: "Руководители ОП"
+      }
     },
     {
       path: '/exit',
       name: 'Выход',
-      component: () => import('@/views/ExitView.vue')
+      component: () => import('@/views/ExitView.vue'),
+      meta: {
+        breadcrumbs: "Выход"
+      }
     }
   ]
 })

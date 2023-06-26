@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { usePermissionStore } from '@/stores'
 import { KServiceHeader } from '@kosygin-rsu/components'
 
 const route = useRoute()
+const store = usePermissionStore()
 
 const notificationPath = ref('https://example.com')
 const name = ref('Огородов Дмитрий')
@@ -25,6 +27,7 @@ const breadcrumbs = computed(() =>
 
 <template>
   <KServiceHeader
+    v-model="store.permission"
     :path="breadcrumbs"
     :notification-path="notificationPath"
     :title="currentPageName"
