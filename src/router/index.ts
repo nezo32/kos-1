@@ -1,3 +1,4 @@
+import { usePermissionStore } from '@/stores'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -8,21 +9,41 @@ const router = createRouter({
       name: 'Программы',
       component: () => import('@/Bridge.vue'),
       redirect: '/main',
+      meta: {
+        breadcrumbs: "Программы"
+      },
       children: [
         {
           path: 'main',
           name: 'Программы',
           component: () => import('@/views/HomeView.vue'),
-          meta: {
-            breadcrumbs: "Программы"
-          },
           alias: '/'
         },
         {
           path: 'programs/:id',
           name: "Образовательная программа",
-          component: () => import("@/views/EduProgramView.vue")
-        }
+          component: () => import('@/Bridge.vue'),
+          meta: {
+            breadcrumbs: "Образовательная программа"
+          },
+          redirect: '/programs/:id/main',
+          children: [
+            {
+              path: 'main',
+              name: "Образовательная программа",
+              component: () => import("@/views/EduProgramView.vue"),
+              alias: '/programs/:id'
+            },
+            {
+              path: 'work',
+              name: "Рабочая программа дисциплины",
+              component: () => import("@/views/WorkProgramView.vue"),
+              meta: {
+                breadcrumbs: "Рабочая программа дисциплины"
+              },
+            },
+          ]
+        },
       ]
     },
     {
@@ -31,6 +52,10 @@ const router = createRouter({
       component: () => import('@/views/OPSupervisorsView.vue'),
       meta: {
         breadcrumbs: "Руководители ОП"
+      },
+      beforeEnter: () => {
+        const store = usePermissionStore()
+        return store.permission == 'Оператор' ? true : "/"
       }
     },
     {

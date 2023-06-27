@@ -425,9 +425,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kosygin-rsu/components@npm:^1.7.6":
-  version: 1.7.6
-  resolution: "@kosygin-rsu/components@npm:1.7.6::__archiveUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F41730752%2Fpackages%2Fnpm%2F%40kosygin-rsu%2Fcomponents%2F-%2F%40kosygin-rsu%2Fcomponents-1.7.6.tgz"
+"@kosygin-rsu/components@npm:^1.7.8":
+  version: 1.7.8
+  resolution: "@kosygin-rsu/components@npm:1.7.8::__archiveUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F41730752%2Fpackages%2Fnpm%2F%40kosygin-rsu%2Fcomponents%2F-%2F%40kosygin-rsu%2Fcomponents-1.7.8.tgz"
   dependencies:
     "@vue/cli-service": ^5.0.8
     "@vuepic/vue-datepicker": ^3.6.0
@@ -438,7 +438,7 @@ __metadata:
     vue-router: ^4.1.5
   peerDependencies:
     vue: ^3.2.45
-  checksum: 072c06231107faa5eac62208c4ced1793d91bb978463905b5dd3786008b7db628ab2a9b2b618bbd2c6c12323272c4a47a3618bad27236eddeefef2de8ae12052
+  checksum: ebc13cc662ff962e9be9c0487de4aca9fc5b8de8b91d87edbd6911030959238d28d72439b6463e6108dadbb7f66814af5a84720515444ca8bf475d68ff23505b
   languageName: node
   linkType: hard
 
@@ -1560,7 +1560,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accreditation-frontend@workspace:."
   dependencies:
-    "@kosygin-rsu/components": ^1.7.6
+    "@kosygin-rsu/components": ^1.7.8
     "@rushstack/eslint-patch": ^1.2.0
     "@tsconfig/node18": ^2.0.1
     "@types/node": ^18.16.17

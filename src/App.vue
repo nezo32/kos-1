@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { KFooter } from '@kosygin-rsu/components'
 import Menu from '@/components/Menu.vue'
 import PageHeader from '@/components/PageHeader.vue'
 </script>
