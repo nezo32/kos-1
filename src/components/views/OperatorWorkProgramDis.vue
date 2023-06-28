@@ -30,9 +30,21 @@ async function changeDocument(ind: number) {
       <EmployeeCard />
     </div>
     <div class="work-program__selector">
-      <KSwitchButton content="бебра" v-model="documentSelector[0]" @click="changeDocument(0)" />
-      <KSwitchButton content="бобра" v-model="documentSelector[1]" @click="changeDocument(1)" />
-      <KSwitchButton content="бабра" v-model="documentSelector[2]" @click="changeDocument(2)" />
+      <KSwitchButton
+        content="Рабочая программа дисциплины"
+        v-model="documentSelector[0]"
+        @click="changeDocument(0)"
+      />
+      <KSwitchButton
+        content="Аннотация рабочей программы дисциплины"
+        v-model="documentSelector[1]"
+        @click="changeDocument(1)"
+      />
+      <KSwitchButton
+        content="Оценочные средства по дисциплине"
+        v-model="documentSelector[2]"
+        @click="changeDocument(2)"
+      />
     </div>
     <Document
       status="Ожидает проверки"
@@ -64,6 +76,7 @@ async function changeDocument(ind: number) {
       width: 100%;
       > * {
         width: 100%;
+        padding: 12px 10px !important;
       }
     }
 

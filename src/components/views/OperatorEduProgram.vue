@@ -3,12 +3,23 @@ import { KTable } from '@kosygin-rsu/components'
 import DepLeadHomeCard from '@/components/DepLeadHomeCard.vue'
 import EmployeeCard from '@/components/EmployeeCard.vue'
 import DocumentsCard from '@/components/DocumentsCard.vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
 
 const tableData = [
   ['Астрономия', 'В разработке', 'Отсутствует', 'Отклонен', 'Не назначен'],
   ['Гражданское строительство', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.'],
   ['Генетика', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.']
 ]
+
+function tableRoutingDisciplines(v: string[]) {
+  router.push(route.fullPath + '/work_discipline')
+}
+function tableRoutingPractice(v: string[]) {
+  router.push(route.fullPath + '/work_practice')
+}
 </script>
 
 <template>
@@ -27,12 +38,14 @@ const tableData = [
       <DocumentsCard />
     </div>
     <KTable
+      :routing-handler="tableRoutingDisciplines"
       :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
       :pages="1"
       title="Рабочие программы дисциплин"
       :content="tableData"
     />
     <KTable
+      :routing-handler="tableRoutingPractice"
       :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
       :pages="1"
       title="Рабочие программы практик"

@@ -35,11 +35,19 @@ const router = createRouter({
               alias: '/programs/:id'
             },
             {
-              path: 'work',
+              path: 'work_discipline',
               name: "Рабочая программа дисциплины",
-              component: () => import("@/views/WorkProgramView.vue"),
+              component: () => import("@/views/WorkProgramDisView.vue"),
               meta: {
                 breadcrumbs: "Рабочая программа дисциплины"
+              },
+            },
+            {
+              path: 'work_practice',
+              name: "Рабочая программа практики",
+              component: () => import("@/views/WorkProgramPracView.vue"),
+              meta: {
+                breadcrumbs: "Рабочая программа практики"
               },
             },
           ]

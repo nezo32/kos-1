@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUpdated, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onUpdated, ref } from 'vue'
+import { useRoute, type RouteLocationMatched } from 'vue-router'
 import { usePermissionStore } from '@/stores'
 import { KServiceHeader } from '@kosygin-rsu/components'
 
@@ -20,9 +20,14 @@ const availablePermissions = ref([
 const currentPageName = computed(() => route.name?.toString() || 'Placeholder')
 const breadcrumbs = computed(() =>
   route.matched
-    .map((el) => ({ name: el.meta.breadcrumbs as string, path: el.path }))
+    .map((el) => ({ name: el.meta.breadcrumbs as string, path: pathChecker(el) }))
     .filter((el) => el.name)
 )
+
+function pathChecker(thisRoute: RouteLocationMatched): string {
+  if (!thisRoute.path.includes(':id')) return thisRoute.path
+  return thisRoute.path.replace(':id', route.params.id as string)
+}
 </script>
 
 <template>

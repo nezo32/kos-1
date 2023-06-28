@@ -42,6 +42,7 @@ import { KDocumentStatusIcon } from '@kosygin-rsu/components'
 
 <style scoped lang="scss">
 .documents__card {
+  color: var(--main-text);
   border-radius: 20px;
   background: var(--white);
   padding: 20px;

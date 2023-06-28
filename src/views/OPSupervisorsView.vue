@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import ModalSetSupervisor from '@/components/modals/ModalSetSupervisor.vue'
 import { KFilter, KFilterResetIcon, KTable } from '@kosygin-rsu/components'
-import { reactive } from 'vue'
+import { reactive, ref, watch } from 'vue'
+
 const data = reactive([
   ['38.03.04', 'Сервис', 'Фортепиано', 'Очная', 'Назначить'],
   ['39.03.04', 'Социология', 'Информационные системы и технологии', 'Очно-заочная', 'Зуев П. И.'],
@@ -19,6 +21,26 @@ const data = reactive([
     'Назначить'
   ]
 ])
+
+const which = ref<string[]>([])
+
+const modalActive = ref(false)
+const selected = ref('')
+const saved = ref(false)
+
+watch(saved, () => {
+  if (!saved.value) return
+  const changeInd = data.findIndex((el) => which.value.toString() == el.toString())
+  data[changeInd][data.length] = selected.value
+  selected.value = ''
+  modalActive.value = false
+  saved.value = false
+})
+
+function selectSupevisorHandler(data: string[]) {
+  modalActive.value = true
+  which.value = data
+}
 </script>
 
 <template>
@@ -31,6 +53,7 @@ const data = reactive([
       <KFilterResetIcon />
     </div>
     <KTable
+      @select="selectSupevisorHandler"
       :headers="['Код', 'Направление подготовки', 'Профиль', 'Форма', 'Руководитель']"
       title="Назначение руководителей"
       subtitle="2021 год"
@@ -38,9 +61,15 @@ const data = reactive([
       :content="data"
     />
   </div>
+  <ModalSetSupervisor
+    v-if="modalActive"
+    v-model:active="modalActive"
+    v-model:save="saved"
+    v-model:selected="selected"
+  />
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 .supervisors-op {
   display: flex;
   flex-direction: column;
@@ -60,6 +89,11 @@ const data = reactive([
       &:first-child {
         flex-shrink: unset;
       }
+    }
+  }
+  .table__text.select {
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

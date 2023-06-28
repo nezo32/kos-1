@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { KFilter, KFilterResetIcon } from '@kosygin-rsu/components'
 import DepLeadHomeCard from '@/components/DepLeadHomeCard.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 </script>
 
 <template>
@@ -13,6 +16,7 @@ import DepLeadHomeCard from '@/components/DepLeadHomeCard.vue'
     </div>
     <div class="dep-lead-home__content">
       <DepLeadHomeCard
+        @click="router.push(`programs/${i}`)"
         v-for="i in 3"
         code="01.03.02"
         name="Прикладная математика и информатика"

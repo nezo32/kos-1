@@ -7,7 +7,7 @@ const store = usePermissionStore()
 
 <template>
   <div>
-    <OperatorEduProgram v-if="store.permission == 'Оператор'" />
+    <OperatorEduProgram />
   </div>
 </template>
 

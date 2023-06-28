@@ -1,0 +1,37 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+
+  z-index: 999;
+
+  background: rgba(255, 255, 255, 0.48);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > svg {
+    position: absolute;
+    top: 60px;
+    right: 60px;
+
+    cursor: pointer;
+  }
+
+  &-inner {
+    /* & > * {
+          min-height: 600px;
+        } */
+
+    position: relative;
+
+    background: var(--white);
+    box-shadow: 2px 2px 6px rgba(11, 20, 64, 0.2);
+    border-radius: 24px;
+    padding: 30px;
+  }
+}
