@@ -4,9 +4,8 @@ import DepLeadHomeCard from '@/components/DepLeadHomeCard.vue'
 import EmployeeCard from '@/components/EmployeeCard.vue'
 import DocumentsCard from '@/components/DocumentsCard.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { usePermissionStore } from '@/stores'
+import Document from '@/components/Document.vue'
 
-const store = usePermissionStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -15,21 +14,10 @@ const tableData = [
   ['Гражданское строительство', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.'],
   ['Генетика', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.']
 ]
-
-function tableRoutingDisciplines(v: string[]) {
-  store.permission == 'Преподаватель'
-    ? router.push(route.fullPath + '/work_discipline/edit')
-    : router.push(route.fullPath + '/work_discipline')
-}
-function tableRoutingPractice(v: string[]) {
-  store.permission == 'Преподаватель'
-    ? router.push(route.fullPath + '/work_practice/edit')
-    : router.push(route.fullPath + '/work_practice')
-}
 </script>
 
 <template>
-  <div class="edu-program">
+  <div class="view-document">
     <DepLeadHomeCard
       code="01.03.02"
       name="Прикладная математика и информатика"
@@ -39,29 +27,16 @@ function tableRoutingPractice(v: string[]) {
       year="2021 год"
       filled="2%"
     />
-    <div class="edu-program__inner">
+    <div class="view-document__inner">
       <EmployeeCard />
       <DocumentsCard />
     </div>
-    <KTable
-      :routing-handler="tableRoutingDisciplines"
-      :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
-      :pages="1"
-      title="Рабочие программы дисциплин"
-      :content="tableData"
-    />
-    <KTable
-      :routing-handler="tableRoutingPractice"
-      :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
-      :pages="1"
-      title="Рабочие программы практик"
-      :content="tableData"
-    />
+    <Document pdf="https://ncu.rcnpv.com.tw/Uploads/20131231103232738561744.pdf" />
   </div>
 </template>
 
 <style scoped lang="scss">
-.edu-program {
+.view-document {
   display: flex;
   flex-direction: column;
   gap: 20px;

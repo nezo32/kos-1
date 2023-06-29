@@ -4,7 +4,7 @@ import { KVerticalMenu, KVerticalMenuButtons } from '@kosygin-rsu/components'
 import { reactive, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
-const active = reactive([false, false, false, false, false])
+const active = reactive([false, false, false])
 
 const route = useRoute()
 const store = usePermissionStore()

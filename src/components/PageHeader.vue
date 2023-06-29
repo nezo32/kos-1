@@ -17,7 +17,7 @@ const availablePermissions = ref([
   { name: 'Преподаватель' }
 ])
 
-const currentPageName = computed(() => route.name?.toString() || 'Placeholder')
+const currentPageName = computed(() => (route.meta.breadcrumbs as string) || 'Placeholder')
 const breadcrumbs = computed(() =>
   route.matched
     .map((el) => ({ name: el.meta.breadcrumbs as string, path: pathChecker(el) }))
@@ -32,6 +32,7 @@ function pathChecker(thisRoute: RouteLocationMatched): string {
 
 <template>
   <KServiceHeader
+    class="sh"
     v-model="store.permission"
     :path="breadcrumbs"
     :notification-path="notificationPath"
@@ -42,4 +43,10 @@ function pathChecker(thisRoute: RouteLocationMatched): string {
   />
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss">
+.sh {
+  .profile__name-status {
+    white-space: nowrap;
+  }
+}
+</style>
