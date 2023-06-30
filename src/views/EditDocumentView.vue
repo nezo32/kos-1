@@ -1,25 +1,8 @@
 <script setup lang="ts">
-import { KTable } from '@kosygin-rsu/components'
 import DepLeadHomeCard from '@/components/DepLeadHomeCard.vue'
 import EmployeeCard from '@/components/EmployeeCard.vue'
 import DocumentsCard from '@/components/DocumentsCard.vue'
-import { useRoute, useRouter } from 'vue-router'
-
-const router = useRouter()
-const route = useRoute()
-
-const tableData = [
-  ['Астрономия', 'В разработке', 'Отсутствует', 'Отклонен', 'Не назначен'],
-  ['Гражданское строительство', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.'],
-  ['Генетика', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.']
-]
-
-function tableRoutingDisciplines(v: string[]) {
-  router.push(route.fullPath + '/work_discipline')
-}
-function tableRoutingPractice(v: string[]) {
-  router.push(route.fullPath + '/work_practice')
-}
+import DescriptionOOP from '@/components/edit/DescriptionOOP.vue'
 </script>
 
 <template>
@@ -37,7 +20,7 @@ function tableRoutingPractice(v: string[]) {
       <EmployeeCard />
       <DocumentsCard />
     </div>
-    Здесь редактируется документ
+    <DescriptionOOP />
   </div>
 </template>
 

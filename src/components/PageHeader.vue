@@ -11,8 +11,8 @@ const notificationPath = ref('https://example.com')
 const name = ref('Огородов Дмитрий')
 const pfpUrl = ref('/images/placeholder.png')
 const availablePermissions = ref([
-  { name: 'Оператор', default: true },
-  { name: 'Руководитель ООП' },
+  { name: 'Оператор' },
+  { name: 'Руководитель ООП', default: true },
   { name: 'Заведующий кафедры' },
   { name: 'Преподаватель' }
 ])

@@ -425,9 +425,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kosygin-rsu/components@npm:^1.7.10":
-  version: 1.7.10
-  resolution: "@kosygin-rsu/components@npm:1.7.10::__archiveUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F41730752%2Fpackages%2Fnpm%2F%40kosygin-rsu%2Fcomponents%2F-%2F%40kosygin-rsu%2Fcomponents-1.7.10.tgz"
+"@kosygin-rsu/components@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "@kosygin-rsu/components@npm:1.8.1::__archiveUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F41730752%2Fpackages%2Fnpm%2F%40kosygin-rsu%2Fcomponents%2F-%2F%40kosygin-rsu%2Fcomponents-1.8.1.tgz"
   dependencies:
     "@vue/cli-service": ^5.0.8
     "@vuepic/vue-datepicker": ^3.6.0
@@ -438,7 +438,7 @@ __metadata:
     vue-router: ^4.1.5
   peerDependencies:
     vue: ^3.2.45
-  checksum: 31bf176ce7a67844464527899db691914e841f752db5d738ce3b20945be5e9366d48c6ec14066a53a56fad1caa742b1e1dd6c040037846e35fe1489b44446839
+  checksum: dd23b7a1e07efe3584671dfd2741f7ef88affed7867a9fad8f31d46ad5c1109d7a4db49a0decfef40baa71fe87995478eec00a01e7b06bfe2bb2dbfaede16af9
   languageName: node
   linkType: hard
 
@@ -812,6 +812,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: b9bbb2b5c5ead2fb884bb019f61a014e37410bddd295de28184e1b2e71ee6b04120c5ba7b9954617f0bdf962c13d06249ce65004490889c747c80d3f628ea842
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^9.0.2":
+  version: 9.0.2
+  resolution: "@types/uuid@npm:9.0.2"
+  checksum: 1754bcf3444e1e3aeadd6e774fc328eb53bc956665e2e8fb6ec127aa8e1f43d9a224c3d22a9a6233dca8dd81a12dc7fed4d84b8876dd5ec82d40f574f7ff8b68
   languageName: node
   linkType: hard
 
@@ -1560,10 +1567,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accreditation-frontend@workspace:."
   dependencies:
-    "@kosygin-rsu/components": ^1.7.10
+    "@kosygin-rsu/components": ^1.8.1
     "@rushstack/eslint-patch": ^1.2.0
     "@tsconfig/node18": ^2.0.1
     "@types/node": ^18.16.17
+    "@types/uuid": ^9.0.2
     "@vitejs/plugin-vue": ^4.2.3
     "@vue/eslint-config-prettier": ^7.1.0
     "@vue/eslint-config-typescript": ^11.0.3
@@ -1576,6 +1584,7 @@ __metadata:
     prettier: ^2.8.8
     sass: ^1.63.6
     typescript: ~5.0.4
+    uuid: ^9.0.0
     vite: ^4.3.9
     vue: ^3.3.4
     vue-router: ^4.2.2
@@ -7809,6 +7818,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "uuid@npm:9.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 
