@@ -1,6 +1,8 @@
 import { usePermissionStore } from '@/stores'
 import { createRouter, createWebHistory } from 'vue-router'
 
+
+
 const checkDocumentEdit = () => {
   const store = usePermissionStore()
   return store.permission == 'Руководитель ООП' ? true : "/"

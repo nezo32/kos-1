@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TF1 from '@/components/edit/description/O2TableForms/TF1.vue'
+import TF2 from '@/components/edit/description/O2TableForms/TF2.vue'
 import { KForms } from '@kosygin-rsu/components'
 </script>
 
@@ -28,6 +29,9 @@ import { KForms } from '@kosygin-rsu/components'
     </section>
     <section>
       <TF1 />
+    </section>
+    <section>
+      <TF2 />
     </section>
   </div>
 </template>

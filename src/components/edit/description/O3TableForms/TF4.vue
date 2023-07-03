@@ -37,7 +37,9 @@ watch(data, () => {
     if (
       el.name == '' &&
       ind != data.length - 1 &&
-      el.data.every((e) => e.code == '' && e.text == '' && e.type == '')
+      el.data[el.data.length - 1].code == '' &&
+      el.data[el.data.length - 1].text == '' &&
+      el.data[el.data.length - 1].type == ''
     ) {
       data.splice(ind, 1)
     }
@@ -48,7 +50,7 @@ watch(data, () => {
 <template>
   <BasicTableForms header="Перечень основных задач профессиональной деятельности выпускников">
     <template #head>
-      <div class="tf2__head">
+      <div class="tf4__head">
         <p class="forms__text">
           Задачи профессиональной<br />
           деятельности
@@ -57,21 +59,21 @@ watch(data, () => {
       </div>
     </template>
     <template #body>
-      <div class="tf2__body">
-        <div class="tf2__body__data" v-for="(v, i) in data" :key="v.key">
+      <div class="tf4__body">
+        <div class="tf4__body__data" v-for="(v, i) in data" :key="v.key">
           <KForms type="input" :content="[]" v-model="v.name" />
-          <div class="tf2__body__data__content">
-            <div class="tf2__body__data__content__inner" v-for="value in v.data" :key="value.key">
+          <div class="tf4__body__data__content">
+            <div class="tf4__body__data__content__inner" v-for="value in v.data" :key="value.key">
               <KForms type="input" :content="[]" v-model="value.type" />
               <section>
                 <Textarea v-model="value.code" />
                 <Textarea v-model="value.text" />
               </section>
             </div>
-            <div class="tf2__body__data__content__add">
+            <div class="tf4__body__data__content__add">
               <p></p>
               <div
-                class="tf2__body__data__content__add__text"
+                class="tf4__body__data__content__add__text"
                 @click="
                   data[i].data[data[i].data.length - 1].code &&
                   data[i].data[data[i].data.length - 1].text
@@ -86,10 +88,10 @@ watch(data, () => {
             </div>
           </div>
         </div>
-        <div class="tf2__body__add">
+        <div class="tf4__body__add">
           <p></p>
           <div
-            class="tf2__body__add__text"
+            class="tf4__body__add__text"
             @click="data[data.length - 1].name ? data.push(getNewGeneral()) : true"
           >
             <span>+</span>
@@ -103,7 +105,7 @@ watch(data, () => {
 </template>
 
 <style scoped lang="scss">
-.tf2 {
+.tf4 {
   &__body {
     display: flex;
     flex-direction: column;
