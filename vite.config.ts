@@ -14,8 +14,15 @@ export default defineConfig({
     }
   },
   server: {
-    cors: {
-      origin: "*"
-    }
+    proxy: {
+      '/api': {
+        target: "https://accreditation.rguk.local/",
+        changeOrigin: true,
+        secure: false,
+
+        rewrite: (p) => p.replace(/^\/api/, '')
+      },
+    },
+    cors: false,
   }
 })

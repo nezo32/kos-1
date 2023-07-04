@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getMainView } from '@/core'
 import { KFilter, KFilterResetIcon, KTable, KArrowFormIcon } from '@kosygin-rsu/components'
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
@@ -55,6 +56,8 @@ data.forEach(
 function tableRouting(v: string[]) {
   router.push('/programs/test')
 }
+
+console.log(await getMainView())
 </script>
 
 <template>
@@ -69,6 +72,7 @@ function tableRouting(v: string[]) {
     <div class="home__content">
       <template v-for="(v, i) of data" :key="i">
         <KTable
+          :current-page="1"
           :routing-handler="tableRouting"
           v-if="v.opened"
           :title="v.title"

@@ -5,10 +5,14 @@ import EmployeeCard from '@/components/EmployeeCard.vue'
 import DocumentsCard from '@/components/DocumentsCard.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePermissionStore } from '@/stores'
+import { ref } from 'vue'
 
 const store = usePermissionStore()
 const router = useRouter()
 const route = useRoute()
+
+const pageT1 = ref(1)
+const pageT2 = ref(1)
 
 const tableData = [
   ['Астрономия', 'В разработке', 'Отсутствует', 'Отклонен', 'Не назначен'],
@@ -44,6 +48,7 @@ function tableRoutingPractice(v: string[]) {
       <DocumentsCard />
     </div>
     <KTable
+      v-model:current-page="pageT1"
       :routing-handler="tableRoutingDisciplines"
       :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
       :pages="1"
@@ -51,6 +56,7 @@ function tableRoutingPractice(v: string[]) {
       :content="tableData"
     />
     <KTable
+      v-model:current-page="pageT2"
       :routing-handler="tableRoutingPractice"
       :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
       :pages="1"

@@ -8,7 +8,7 @@ defineProps<{
 
 <template>
   <div class="basic__table-forms">
-    <div class="basic__table-forms__header">
+    <div class="basic__table-forms__header" v-if="header">
       <span class="input__header">{{ header || 'header' }}</span>
       <KHintIcon active />
     </div>

@@ -5,6 +5,10 @@ import DescMain from './description/DescMain.vue'
 import O1 from './description/O1.vue'
 import O2 from './description/O2.vue'
 import O3 from './description/O3.vue'
+import O4 from './description/O4.vue'
+import O7First from './description/O7First.vue'
+import O7Second from './description/O7Second.vue'
+import Resurses from './description/Resurses.vue'
 
 const page = ref(1)
 
@@ -26,13 +30,17 @@ const headers = reactive([
       v-model:currentPage="page"
       title="ОПОП"
       :header="headers[page - 1]"
-      :pages="7"
+      :pages="8"
       dropdown
     >
       <DescMain v-if="page == 1" />
       <O1 v-if="page == 2" />
       <O2 v-if="page == 3" />
       <O3 v-if="page == 4" />
+      <O4 v-if="page == 5" />
+      <O7First v-if="page == 6" />
+      <O7Second v-if="page == 7" />
+      <Resurses v-if="page == 8" />
     </DocumentEditBase>
   </div>
 </template>

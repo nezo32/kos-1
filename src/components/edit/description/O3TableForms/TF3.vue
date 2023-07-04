@@ -6,11 +6,20 @@ import { v4 as uuidv4 } from 'uuid'
 import { reactive, watch } from 'vue'
 
 type DataType = {
+  type: string
   name: string
   key: string
-  data: {
+  dataOTF: {
     key: string
-    opk: string
+    otf: string
+    data: {
+      code: string
+      key: string
+    }[]
+  }[]
+  dataPK: {
+    key: string
+    pk: string
     data: {
       code: string
       key: string
@@ -19,40 +28,49 @@ type DataType = {
 }
 
 const getNewGeneral: () => DataType = () => ({
+  type: '',
   name: '',
   key: uuidv4(),
-  data: reactive([getNewInner()])
+  dataOTF: reactive([getNewOTF()]),
+  dataPK: reactive([getNewPK()])
 })
-const getNewInner = () => ({ key: uuidv4(), opk: '', data: reactive([getNewSmaller()]) })
+const getNewPK = () => ({ key: uuidv4(), pk: '', data: reactive([getNewSmaller()]) })
+const getNewOTF = () => ({ key: uuidv4(), otf: '', data: reactive([getNewSmaller()]) })
 const getNewSmaller = () => ({ key: uuidv4(), code: '' })
 
 const data = reactive<DataType[]>([getNewGeneral()])
 
 watch(data, () => {
   data.forEach((e, i) => {
-    e.data.forEach((elem, ind) => {
-      elem.data.forEach((element, index) => {
-        if (element.code == '' && index != elem.data.length - 1) {
-          data[i].data[ind].data.splice(index, 1)
-        }
+    e.dataOTF.forEach((el, ind) => {
+      el.data.forEach((elem, inde) => {
+        elem.code == '' && inde != el.data.length - 1
+          ? data[i].dataOTF[ind].data.splice(inde, 1)
+          : true
       })
+      el.otf == '' && ind != e.dataOTF.length - 1 && el.data.every((v) => v.code == '')
+        ? data[i].dataOTF.splice(ind, 1)
+        : true
     })
-    e.data.forEach((elem, ind) => {
-      if (
-        elem.opk == '' &&
-        ind != e.data.length - 1 &&
-        elem.data.every((element) => element.code == '')
-      ) {
-        data[i].data.splice(ind, 1)
-      }
+
+    e.dataPK.forEach((el, ind) => {
+      el.data.forEach((elem, inde) => {
+        elem.code == '' && inde != el.data.length - 1
+          ? data[i].dataPK[ind].data.splice(inde, 1)
+          : true
+      })
+      el.pk == '' && ind != e.dataPK.length - 1 && el.data.every((v) => v.code == '')
+        ? data[i].dataPK.splice(ind, 1)
+        : true
     })
-    if (
-      e.name == '' &&
-      i != data.length - 1 &&
-      e.data.every((elem) => elem.data.every((element) => element.code == '') && elem.opk == '')
-    ) {
-      data.splice(i, 1)
-    }
+
+    i != data.length - 1 &&
+    e.name == '' &&
+    e.type == '' &&
+    e.dataOTF.every((v) => v.otf == '' && v.data.every((val) => val.code == '')) &&
+    e.dataPK.every((v) => v.pk == '' && v.data.every((val) => val.code == ''))
+      ? data.splice(i, 1)
+      : true
   })
 })
 </script>
@@ -64,12 +82,12 @@ watch(data, () => {
     <template #head>
       <div class="tf3__head">
         <p class="forms__text">
-          Код и наименование<br />
-          общепрофессиональной компетенции
+          Код, наименование и уровень квалификации ОТФ на<br />
+          которые ориентирована образовательная программа
         </p>
         <p class="forms__text">
-          Код и наименование индикатора достижения<br />
-          общепрофессиональной компетенции (ИД-ОПК)
+          Код и наименование ТФ на которые ориентирована<br />
+          образовательная программа
         </p>
       </div>
     </template>
@@ -77,13 +95,14 @@ watch(data, () => {
       <div class="tf3__body">
         <div class="tf3__body__data" v-for="(v, i) in data" :key="v.key">
           <KForms type="input" :content="[]" v-model="v.name" />
+          <KForms type="input" :content="[]" v-model="v.type" />
           <div class="tf3__body__data__content">
             <div
               class="tf3__body__data__content__inner"
-              v-for="(val, ind) in v.data"
+              v-for="(val, ind) in v.dataOTF"
               :key="val.key"
             >
-              <Textarea v-model="val.opk" />
+              <Textarea v-model="val.otf" />
               <div class="tf3__body__data__content__inner__right">
                 <section v-for="(value, index) in val.data" :key="value.key">
                   <Textarea v-model="value.code" />
@@ -94,11 +113,11 @@ watch(data, () => {
                     <div
                       class="tf3__body__data__content__inner__right__add__text"
                       @click="
-                        value.code != '' ? data[i].data[ind].data.push(getNewSmaller()) : true
+                        value.code != '' ? data[i].dataOTF[ind].data.push(getNewSmaller()) : true
                       "
                     >
                       <span>+</span>
-                      Добавить ИД-ОПК
+                      Добавить ТФ
                     </div>
                   </div>
                 </section>
@@ -109,11 +128,54 @@ watch(data, () => {
               <div
                 class="tf3__body__data__content__add__text"
                 @click="
-                  v.data[v.data.length - 1].opk != '' ? data[i].data.push(getNewInner()) : true
+                  v.dataOTF[v.dataOTF.length - 1].otf != ''
+                    ? data[i].dataOTF.push(getNewOTF())
+                    : true
                 "
               >
                 <span>+</span>
-                Добавить ОПК
+                Добавить ОТФ
+              </div>
+              <p></p>
+            </div>
+          </div>
+          <div class="tf3__body__data__content">
+            <div
+              class="tf3__body__data__content__inner"
+              v-for="(val, ind) in v.dataPK"
+              :key="val.key"
+            >
+              <Textarea v-model="val.pk" />
+              <div class="tf3__body__data__content__inner__right">
+                <section v-for="(value, index) in val.data" :key="value.key">
+                  <Textarea v-model="value.code" />
+                  <div
+                    class="tf3__body__data__content__inner__right__add"
+                    v-if="index == val.data.length - 1"
+                  >
+                    <div
+                      class="tf3__body__data__content__inner__right__add__text"
+                      @click="
+                        value.code != '' ? data[i].dataPK[ind].data.push(getNewSmaller()) : true
+                      "
+                    >
+                      <span>+</span>
+                      Добавить ИД-ПК
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <div class="tf3__body__data__content__add">
+              <p></p>
+              <div
+                class="tf3__body__data__content__add__text"
+                @click="
+                  v.dataPK[v.dataPK.length - 1].pk != '' ? data[i].dataPK.push(getNewPK()) : true
+                "
+              >
+                <span>+</span>
+                Добавить ПК
               </div>
               <p></p>
             </div>
@@ -126,7 +188,7 @@ watch(data, () => {
             @click="data[data.length - 1].name ? data.push(getNewGeneral()) : true"
           >
             <span>+</span>
-            Добавить общепрофессиональную компетенцию
+            Добавить
           </div>
           <p></p>
         </div>
