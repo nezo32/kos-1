@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { getMainView } from '@/core'
 import { KFilter, KFilterResetIcon, KTable, KArrowFormIcon } from '@kosygin-rsu/components'
-import { reactive } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { stringFirstToUpper } from '@/utils'
 
 type DataType = Array<{
   title: string
@@ -12,31 +13,16 @@ type DataType = Array<{
   opened: boolean
 }>
 
+const currentPage = ref(1)
+
 const router = useRouter()
 
 const data = reactive<DataType>([
   {
     opened: true,
     title: 'Основные образовательные программы',
-    subtitle: '2021 год',
-    data: [
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%'],
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%'],
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%'],
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%']
-    ],
-    headers: []
-  },
-  {
-    opened: false,
-    title: 'Основные образовательные программы',
-    subtitle: '2020 год',
-    data: [
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%'],
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%'],
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%'],
-      ['38.03.04', 'Сервис', 'Фортепиано', 'Аспирант', 'Очно-заочная', '100%']
-    ],
+    subtitle: '2023 год',
+    data: [],
     headers: []
   }
 ])
@@ -54,10 +40,62 @@ data.forEach(
 )
 
 function tableRouting(v: string[]) {
-  router.push('/programs/test')
+  if (!apiData.value) return
+  const found = apiData.value.find((el) => {
+    if (!(el.active_oop?.name && el.oop?.code && el.title && el.qualification && el.edu_form?.name))
+      return false
+
+    const code = el.oop.code
+    const title = el.title.slice(el.title.indexOf(' ') + 1)
+    const name = el.active_oop.name
+    const edu_form = el.edu_form.name.includes(' форма')
+      ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(' форма'))
+      : el.edu_form.name
+    const qualification = stringFirstToUpper(el.qualification)
+
+    return code == v[0] &&
+      title == v[1] &&
+      name == v[2] &&
+      qualification == v[3] &&
+      edu_form == v[4] &&
+      v[5] == '100%'
+      ? true
+      : false
+  })
+  if (!found) return
+  router.push(`/programs/${found.id}`)
 }
 
-console.log(await getMainView())
+const req = await getMainView(currentPage.value)
+
+const apiData = ref(req.data)
+
+async function displayData() {
+  data[0].data.splice(0, data[0].data.length - 1)
+  apiData.value = (await getMainView(currentPage.value)).data
+  apiData.value?.forEach((el) => {
+    if (!(el.active_oop?.name && el.oop?.code && el.title && el.qualification && el.edu_form?.name))
+      return
+    data[0].data.push([
+      el.oop.code,
+      el.title.slice(el.title.indexOf(' ') + 1),
+      el.active_oop.name,
+      stringFirstToUpper(el.qualification),
+      el.edu_form.name.includes(' форма')
+        ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(' форма'))
+        : el.edu_form.name,
+      '100%'
+    ])
+  })
+}
+
+watch(currentPage, async () => {
+  displayData()
+})
+
+onMounted(() => {
+  displayData()
+})
 </script>
 
 <template>
@@ -72,12 +110,12 @@ console.log(await getMainView())
     <div class="home__content">
       <template v-for="(v, i) of data" :key="i">
         <KTable
-          :current-page="1"
+          v-model:current-page="currentPage"
           :routing-handler="tableRouting"
           v-if="v.opened"
           :title="v.title"
           :subtitle="v.subtitle"
-          :pages="1"
+          :pages="Math.ceil(req.count / 15)"
           :headers="v.headers"
           :content="v.data"
         />
@@ -93,7 +131,11 @@ console.log(await getMainView())
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
+.table__body__column {
+  max-width: 230px !important;
+}
+
 .home {
   display: flex;
   flex-direction: column;

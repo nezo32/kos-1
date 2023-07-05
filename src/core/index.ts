@@ -8,15 +8,24 @@ await db.auth.login({
     password: 'admin'
 })
 
-export async function getMainView() {
-    db
-    const zalupa = db.items('plans').readByQuery({
+export async function getMainView(page?: number) {
+    const plans = await db.items('plans').readByQuery({
 
         fields: [
-            "oop.code"
+            // @ts-ignore
+            "oop.code",
+            "title",
+            "qualification",
+            // @ts-ignore
+            "edu_form.name",
+            // @ts-ignore
+            "active_oop.name",
+            "id"
         ],
-        //sort: ['year_start'],
-        limit: -1
+        limit: 15,
+        page: page || 1,
+        meta: "total_count"
     })
-    return zalupa
+
+    return { data: plans.data, count: plans.meta?.total_count ?? 0 }
 }

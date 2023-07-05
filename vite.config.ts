@@ -22,6 +22,14 @@ export default defineConfig({
 
         rewrite: (p) => p.replace(/^\/api/, '')
       },
+      '/ws': {
+        target: "wss://accreditation.rguk.local/websocket",
+        ws: true,
+        changeOrigin: true,
+        secure: true,
+
+        rewrite: (p) => p.replace(/^\/ws/, '')
+      }
     },
     cors: false,
   }

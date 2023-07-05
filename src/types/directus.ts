@@ -1,15 +1,15 @@
 export type Departments = {
     date_created?: string | null;
     date_updated?: string | null;
-    disciplines?: any[] | Disciplines[] | null;
-    faculty?: string | Faculties | null;
+    disciplines?: (any[] & Disciplines[]) | null;
+    faculty?: (string & Faculties) | null;
     id: string;
     mines_id?: string | null;
     name?: string | null;
-    plans?: any[] | Plans[] | null;
+    plans?: (any[] & Plans[]) | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type DirectusActivity = {
@@ -20,9 +20,9 @@ export type DirectusActivity = {
     ip?: string | null;
     item: string;
     origin?: string | null;
-    revisions?: any[] | DirectusRevisions[] | null;
+    revisions?: (any[] & DirectusRevisions[]) | null;
     timestamp: string;
-    user?: string | DirectusUsers | null;
+    user?: (string & DirectusUsers) | null;
     user_agent?: string | null;
 };
 
@@ -35,7 +35,7 @@ export type DirectusCollections = {
     collection: string;
     color?: string | null;
     display_template?: string | null;
-    group?: string | DirectusCollections | null;
+    group?: (string & DirectusCollections) | null;
     hidden: boolean;
     icon?: string | null;
     item_duplication_fields?: unknown | null;
@@ -55,17 +55,17 @@ export type DirectusDashboards = {
     id: string;
     name: string;
     note?: string | null;
-    panels?: any[] | DirectusPanels[] | null;
-    user_created?: string | DirectusUsers | null;
+    panels?: (any[] & DirectusPanels[]) | null;
+    user_created?: (string & DirectusUsers) | null;
 };
 
 export type DirectusFields = {
-    collection?: string | DirectusCollections | null;
+    collection?: (string & DirectusCollections) | null;
     conditions?: unknown | null;
     display?: string | null;
     display_options?: unknown | null;
     field: string;
-    group?: string | DirectusFields | null;
+    group?: (string & DirectusFields) | null;
     hidden: boolean;
     id: number;
     interface?: string | null;
@@ -89,18 +89,18 @@ export type DirectusFiles = {
     filename_disk?: string | null;
     filename_download: string;
     filesize?: number | null;
-    folder?: string | DirectusFolders | null;
+    folder?: (string & DirectusFolders) | null;
     height?: number | null;
     id: string;
     location?: string | null;
     metadata?: unknown | null;
-    modified_by?: string | DirectusUsers | null;
+    modified_by?: (string & DirectusUsers) | null;
     modified_on: string;
     storage: string;
     tags?: unknown | null;
     title?: string | null;
     type?: string | null;
-    uploaded_by?: string | DirectusUsers | null;
+    uploaded_by?: (string & DirectusUsers) | null;
     uploaded_on: string;
     width?: number | null;
 };
@@ -113,18 +113,18 @@ export type DirectusFlows = {
     icon?: string | null;
     id: string;
     name: string;
-    operation?: string | DirectusOperations | null;
-    operations?: any[] | DirectusOperations[] | null;
+    operation?: (string & DirectusOperations) | null;
+    operations?: (any[] & DirectusOperations[]) | null;
     options?: unknown | null;
     status: string;
     trigger?: string | null;
-    user_created?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
 };
 
 export type DirectusFolders = {
     id: string;
     name: string;
-    parent?: string | DirectusFolders | null;
+    parent?: (string & DirectusFolders) | null;
 };
 
 export type DirectusMigrations = {
@@ -138,8 +138,8 @@ export type DirectusNotifications = {
     id: number;
     item?: string | null;
     message?: string | null;
-    recipient?: string | DirectusUsers | null;
-    sender?: string | DirectusUsers | null;
+    recipient?: (string & DirectusUsers) | null;
+    sender?: (string & DirectusUsers) | null;
     status?: string | null;
     subject: string;
     timestamp?: string | null;
@@ -147,22 +147,22 @@ export type DirectusNotifications = {
 
 export type DirectusOperations = {
     date_created?: string | null;
-    flow?: string | DirectusFlows | null;
+    flow?: (string & DirectusFlows) | null;
     id: string;
     key: string;
     name?: string | null;
     options?: unknown | null;
     position_x: number;
     position_y: number;
-    reject?: string | DirectusOperations | null;
-    resolve?: string | DirectusOperations | null;
+    reject?: (string & DirectusOperations) | null;
+    resolve?: (string & DirectusOperations) | null;
     type: string;
-    user_created?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
 };
 
 export type DirectusPanels = {
     color?: string | null;
-    dashboard?: string | DirectusDashboards | null;
+    dashboard?: (string & DirectusDashboards) | null;
     date_created?: string | null;
     height: number;
     icon?: string | null;
@@ -174,7 +174,7 @@ export type DirectusPanels = {
     position_y: number;
     show_header: boolean;
     type: string;
-    user_created?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
     width: number;
 };
 
@@ -185,7 +185,7 @@ export type DirectusPermissions = {
     id: number;
     permissions?: unknown | null;
     presets?: unknown | null;
-    role?: string | DirectusRoles | null;
+    role?: (string & DirectusRoles) | null;
     validation?: unknown | null;
 };
 
@@ -200,9 +200,9 @@ export type DirectusPresets = {
     layout_options?: unknown | null;
     layout_query?: unknown | null;
     refresh_interval?: number | null;
-    role?: string | DirectusRoles | null;
+    role?: (string & DirectusRoles) | null;
     search?: string | null;
-    user?: string | DirectusUsers | null;
+    user?: (string & DirectusUsers) | null;
 };
 
 export type DirectusRelations = {
@@ -219,35 +219,35 @@ export type DirectusRelations = {
 };
 
 export type DirectusRevisions = {
-    activity?: number | DirectusActivity | null;
+    activity?: (number & DirectusActivity) | null;
     collection: string;
     data?: unknown | null;
     delta?: unknown | null;
     id: number;
     item: string;
-    parent?: number | DirectusRevisions | null;
+    parent?: (number & DirectusRevisions) | null;
 };
 
 export type DirectusRoles = {
     admin_access: boolean;
     app_access: boolean;
-    available_users?: any[] | JunctionDirectusUsersDirectusRoles[] | null;
+    available_users?: (any[] & JunctionDirectusUsersDirectusRoles[]) | null;
     description?: string | null;
     enforce_tfa: boolean;
     icon: string;
     id: string;
     ip_access?: unknown | null;
     name: string;
-    users?: any[] | DirectusUsers[] | null;
+    users?: (any[] & DirectusUsers[]) | null;
 };
 
 export type DirectusSessions = {
     expires: string;
     ip?: string | null;
     origin?: string | null;
-    share?: string | DirectusShares | null;
+    share?: (string & DirectusShares) | null;
     token: string;
-    user?: string | DirectusUsers | null;
+    user?: (string & DirectusUsers) | null;
     user_agent?: string | null;
 };
 
@@ -263,19 +263,19 @@ export type DirectusSettings = {
     module_bar?: unknown | null;
     project_color?: string | null;
     project_descriptor?: string | null;
-    project_logo?: string | DirectusFiles | null;
+    project_logo?: (string & DirectusFiles) | null;
     project_name: string;
     project_url?: string | null;
-    public_background?: string | DirectusFiles | null;
-    public_foreground?: string | DirectusFiles | null;
+    public_background?: (string & DirectusFiles) | null;
+    public_foreground?: (string & DirectusFiles) | null;
     public_note?: string | null;
     storage_asset_presets?: unknown | null;
     storage_asset_transform?: string | null;
-    storage_default_folder?: string | DirectusFolders | null;
+    storage_default_folder?: (string & DirectusFolders) | null;
 };
 
 export type DirectusShares = {
-    collection?: string | DirectusCollections | null;
+    collection?: (string & DirectusCollections) | null;
     date_created?: string | null;
     date_end?: string | null;
     date_start?: string | null;
@@ -284,9 +284,9 @@ export type DirectusShares = {
     max_uses?: number | null;
     name?: string | null;
     password?: string | null;
-    role?: string | DirectusRoles | null;
+    role?: (string & DirectusRoles) | null;
     times_used?: number | null;
-    user_created?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
 };
 
 export type DirectusTranslations = {
@@ -298,8 +298,8 @@ export type DirectusTranslations = {
 
 export type DirectusUsers = {
     auth_data?: unknown | null;
-    available_roles?: any[] | JunctionDirectusUsersDirectusRoles[] | null;
-    avatar?: string | DirectusFiles | null;
+    available_roles?: (any[] & JunctionDirectusUsersDirectusRoles[]) | null;
+    avatar?: (string & DirectusFiles) | null;
     description?: string | null;
     email?: string | null;
     email_notifications?: boolean | null;
@@ -313,7 +313,7 @@ export type DirectusUsers = {
     location?: string | null;
     password?: string | null;
     provider: string;
-    role?: string | DirectusRoles | null;
+    role?: (string & DirectusRoles) | null;
     status: string;
     tags?: unknown | null;
     tfa_secret?: string | null;
@@ -335,49 +335,73 @@ export type DirectusWebhooks = {
 };
 
 export type Disciplines = {
-    children?: any[] | Disciplines[] | null;
+    children?: (any[] & Disciplines[]) | null;
     code?: string | null;
     date_created?: string | null;
     date_updated?: string | null;
-    department?: string | Departments | null;
+    department?: (string & Departments) | null;
+    disciplines_files?: (any[] & DisciplinesFiles[]) | null;
     id: string;
     mines_id?: string | null;
     name?: string | null;
     nesting_level?: number | null;
-    object_type?: string | DisciplinesObjectTypes | null;
-    object_view?: string | DisciplinesObjectViews | null;
-    oop?: string | Oop | null;
-    parent?: string | Disciplines | null;
-    plan?: string | Plans | null;
-    practice_type?: string | PracticeTypes | null;
+    object_type?: (string & DisciplinesObjectTypes) | null;
+    object_view?: (string & DisciplinesObjectViews) | null;
+    oop?: (string & Oop) | null;
+    parent?: (string & Disciplines) | null;
+    plan?: (string & Plans) | null;
+    practice_type?: (string & PracticeTypes) | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
+};
+
+export type DisciplinesFiles = {
+    date_created?: string | null;
+    date_updated?: string | null;
+    discipline?: (string & Disciplines) | null;
+    file?: (string & DirectusFiles) | null;
+    id: string;
+    status: string;
+    type?: (string & DisciplinesFilesTypes) | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
+};
+
+export type DisciplinesFilesTypes = {
+    date_created?: string | null;
+    date_updated?: string | null;
+    disciplines_files?: (any[] & DisciplinesFiles[]) | null;
+    id: string;
+    status: string;
+    title?: string | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type DisciplinesObjectTypes = {
     compose?: boolean | null;
     date_created?: string | null;
     date_updated?: string | null;
-    disciplines?: any[] | Disciplines[] | null;
+    disciplines?: (any[] & Disciplines[]) | null;
     id: string;
     mines_id?: string | null;
     name?: string | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type DisciplinesObjectViews = {
     date_created?: string | null;
     date_updated?: string | null;
-    disciplines?: any[] | Disciplines[] | null;
+    disciplines?: (any[] & Disciplines[]) | null;
     id: string;
     mines_id?: string | null;
     name?: string | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type EduForms = {
@@ -386,12 +410,12 @@ export type EduForms = {
     id: string;
     mines_id?: string | null;
     name?: string | null;
-    plans?: any[] | Plans[] | null;
+    plans?: (any[] & Plans[]) | null;
     prefix?: string | null;
     short_name?: string | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type EduLevels = {
@@ -400,12 +424,12 @@ export type EduLevels = {
     id: string;
     mines_id?: string | null;
     name?: string | null;
-    oops?: any[] | Oop[] | null;
-    plans?: any[] | Plans[] | null;
+    oops?: (any[] & Oop[]) | null;
+    plans?: (any[] & Plans[]) | null;
     prefix?: string | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type Employees = {
@@ -414,89 +438,113 @@ export type Employees = {
     fio?: string | null;
     id: string;
     mines_id?: string | null;
-    plans?: any[] | PlansEmployees[] | null;
+    plans?: (any[] & PlansEmployees[]) | null;
     post?: string | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type Faculties = {
     date_created?: string | null;
     date_updated?: string | null;
-    departments?: any[] | Departments[] | null;
+    departments?: (any[] & Departments[]) | null;
     id: string;
     mines_id?: string | null;
     name?: string | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type JunctionDirectusUsersDirectusRoles = {
-    directus_roles_id?: string | DirectusRoles | null;
-    directus_users_id?: string | DirectusUsers | null;
+    directus_roles_id?: (string & DirectusRoles) | null;
+    directus_users_id?: (string & DirectusUsers) | null;
     id: number;
 };
 
 export type Oop = {
-    active_plans?: any[] | Plans[] | null;
-    children?: any[] | Oop[] | null;
+    active_plans?: (any[] & Plans[]) | null;
+    children?: (any[] & Oop[]) | null;
     code?: string | null;
     date_created?: string | null;
     date_updated?: string | null;
-    disciplines?: any[] | Disciplines[] | null;
-    edu_level?: string | EduLevels | null;
+    disciplines?: (any[] & Disciplines[]) | null;
+    edu_level?: (string & EduLevels) | null;
     id: string;
     mines_id?: string | null;
     name?: string | null;
-    parent?: string | Oop | null;
-    plans?: any[] | Plans[] | null;
+    oop_files?: (any[] & OopFiles[]) | null;
+    parent?: (string & Oop) | null;
+    plans?: (any[] & Plans[]) | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
+};
+
+export type OopFiles = {
+    date_created?: string | null;
+    date_updated?: string | null;
+    file?: (string & DirectusFiles) | null;
+    id: string;
+    oop?: (string & Oop) | null;
+    status: string;
+    type?: (string & OopFilesTypes) | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
+};
+
+export type OopFilesTypes = {
+    date_created?: string | null;
+    date_updated?: string | null;
+    id: string;
+    oop_files?: (any[] & OopFiles[]) | null;
+    status: string;
+    title?: string | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type Plans = {
-    active_oop?: string | Oop | null;
+    active_oop?: (string & Oop) | null;
     date_created?: string | null;
     date_updated?: string | null;
-    disciplines?: any[] | Disciplines[] | null;
-    edu_form?: string | EduForms | null;
-    edu_level?: string | EduLevels | null;
+    disciplines?: (any[] & Disciplines[]) | null;
+    edu_form?: (string & EduForms) | null;
+    edu_level?: (string & EduLevels) | null;
     edu_time?: number | null;
-    employees?: any[] | PlansEmployees[] | null;
+    employees?: (any[] & PlansEmployees[]) | null;
     for_foreign?: boolean | null;
     id: string;
     mines_id?: string | null;
-    oop?: string | Oop | null;
-    prof_department?: string | Departments | null;
+    oop?: (string & Oop) | null;
+    prof_department?: (string & Departments) | null;
     qualification?: string | null;
     specialization?: string | null;
     status: string;
     title?: string | null;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
     year_start?: number | null;
 };
 
 export type PlansEmployees = {
-    employees_id?: string | Employees | null;
+    employees_id?: (string & Employees) | null;
     id: number;
-    plans_id?: string | Plans | null;
+    plans_id?: (string & Plans) | null;
 };
 
 export type PracticeTypes = {
     date_created?: string | null;
     date_updated?: string | null;
-    disciplines?: any[] | Disciplines[] | null;
+    disciplines?: (any[] & Disciplines[]) | null;
     id: string;
     mines_id?: string | null;
     name?: string | null;
     prefix?: string | null;
     status: string;
-    user_created?: string | DirectusUsers | null;
-    user_updated?: string | DirectusUsers | null;
+    user_created?: (string & DirectusUsers) | null;
+    user_updated?: (string & DirectusUsers) | null;
 };
 
 export type CustomDirectusTypes = {
@@ -524,6 +572,8 @@ export type CustomDirectusTypes = {
     directus_users: DirectusUsers;
     directus_webhooks: DirectusWebhooks;
     disciplines: Disciplines;
+    disciplines_files: DisciplinesFiles;
+    disciplines_files_types: DisciplinesFilesTypes;
     disciplines_object_types: DisciplinesObjectTypes;
     disciplines_object_views: DisciplinesObjectViews;
     edu_forms: EduForms;
@@ -532,6 +582,8 @@ export type CustomDirectusTypes = {
     faculties: Faculties;
     junction_directus_users_directus_roles: JunctionDirectusUsersDirectusRoles;
     oop: Oop;
+    oop_files: OopFiles;
+    oop_files_types: OopFilesTypes;
     plans: Plans;
     plans_employees: PlansEmployees;
     practice_types: PracticeTypes;
