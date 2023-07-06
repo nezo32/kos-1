@@ -1,31 +1,37 @@
 <script setup lang="ts">
-import { KTable } from '@kosygin-rsu/components'
-import DepLeadHomeCard from '@/components/DepLeadHomeCard.vue'
-import EmployeeCard from '@/components/EmployeeCard.vue'
-import DocumentsCard from '@/components/DocumentsCard.vue'
-import { useRoute, useRouter } from 'vue-router'
-import Document from '@/components/Document.vue'
+import { KTable } from "@kosygin-rsu/components";
+import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
+import EmployeeCard from "@/components/EmployeeCard.vue";
+import DocumentsCard from "@/components/DocumentsCard.vue";
+import { useRoute, useRouter } from "vue-router";
+import Document from "@/components/Document.vue";
 
-const router = useRouter()
-const route = useRoute()
+import { ref } from "vue";
+import { getPlanById } from "@/core";
+import { stringFirstToUpper } from "@/utils";
 
-const tableData = [
-  ['Астрономия', 'В разработке', 'Отсутствует', 'Отклонен', 'Не назначен'],
-  ['Гражданское строительство', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.'],
-  ['Генетика', 'Отклонен', 'Проверен', 'Разработан', 'Смирнова А. А.']
-]
+const route = useRoute();
+
+const id = route.params.id;
+const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
 </script>
 
 <template>
   <div class="view-document">
     <DepLeadHomeCard
-      code="01.03.02"
-      name="Прикладная математика и информатика"
-      direction="Системное программирование и компьютерные технологии"
-      form="Очно-заочная"
-      graduate="Ассистентура-стажировка"
-      year="2021 год"
-      filled="2%"
+      :code="data?.oop?.code || 'ㅤ'"
+      :name="data?.title ? data?.title.slice(data?.title.indexOf(' ') + 1) : ''"
+      :direction="data?.active_oop?.name || 'ㅤ'"
+      :form="
+        data?.edu_form?.name
+          ? data.edu_form.name.includes(' форма')
+            ? data.edu_form.name.slice(0, data.edu_form.name.indexOf(' форма'))
+            : data.edu_form.name
+          : ''
+      "
+      :graduate="stringFirstToUpper(data?.qualification || 'ㅤ')"
+      year="2023 год"
+      filled="100%"
     />
     <div class="view-document__inner">
       <EmployeeCard />

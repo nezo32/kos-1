@@ -1,108 +1,110 @@
 <script setup lang="ts">
-import { getMainView } from '@/core'
-import { KFilter, KFilterResetIcon, KTable, KArrowFormIcon } from '@kosygin-rsu/components'
-import { onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { stringFirstToUpper } from '@/utils'
+import { getMainView } from "@/core";
+import { KFilter, KFilterResetIcon, KTable, KArrowFormIcon } from "@kosygin-rsu/components";
+import { onMounted, ref, watch, shallowReactive, type Ref } from "vue";
+import { useRouter } from "vue-router";
+import { stringFirstToUpper } from "@/utils";
 
 type DataType = Array<{
-  title: string
-  subtitle: string
-  data: string[][]
-  headers: string[]
-  opened: boolean
-}>
+  title: string;
+  subtitle: string;
+  data: Ref<string[][]>;
+  headers: string[];
+  opened: boolean;
+}>;
 
-const currentPage = ref(1)
+const currentPage = ref(1);
 
-const router = useRouter()
+const router = useRouter();
 
-const data = reactive<DataType>([
+const data = shallowReactive<DataType>([
   {
     opened: true,
-    title: 'Основные образовательные программы',
-    subtitle: '2023 год',
-    data: [],
+    title: "Основные образовательные программы",
+    subtitle: "2023 год",
+    data: ref([]),
     headers: []
   }
-])
+]);
 
 data.forEach(
-  (v, i) =>
-    (data[i].headers = [
-      'Код',
-      'Направление подготовки',
-      'Профиль',
-      'Уровень',
-      'Форма',
-      'Заполнено'
-    ])
-)
+  (v, i) => (data[i].headers = ["Код", "Направление подготовки", "Профиль", "Квалификация", "Форма", "Заполнено"])
+);
 
 function tableRouting(v: string[]) {
-  if (!apiData.value) return
+  if (!apiData.value) return;
   const found = apiData.value.find((el) => {
-    if (!(el.active_oop?.name && el.oop?.code && el.title && el.qualification && el.edu_form?.name))
-      return false
+    if (!(el.active_oop?.name && el.oop?.code && el.title && el.qualification && el.edu_form?.name)) return false;
 
-    const code = el.oop.code
-    const title = el.title.slice(el.title.indexOf(' ') + 1)
-    const name = el.active_oop.name
-    const edu_form = el.edu_form.name.includes(' форма')
-      ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(' форма'))
-      : el.edu_form.name
-    const qualification = stringFirstToUpper(el.qualification)
+    const code = el.oop.code;
+    const title = el.title.slice(el.title.indexOf(" ") + 1);
+    const name = el.active_oop.name;
+    const edu_form = el.edu_form.name.includes(" форма")
+      ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(" форма"))
+      : el.edu_form.name;
+    const qualification = stringFirstToUpper(el.qualification);
 
-    return code == v[0] &&
-      title == v[1] &&
-      name == v[2] &&
-      qualification == v[3] &&
-      edu_form == v[4] &&
-      v[5] == '100%'
+    return code == v[0] && title == v[1] && name == v[2] && qualification == v[3] && edu_form == v[4] && v[5] == "100%"
       ? true
-      : false
-  })
-  if (!found) return
-  router.push(`/programs/${found.id}`)
+      : false;
+  });
+  if (!found) return;
+  router.push(`/programs/${found.id}`);
 }
 
-const req = await getMainView(currentPage.value)
+const count = ref(0);
+const apiData = ref<Awaited<ReturnType<typeof getMainView>>["data"]>();
 
-const apiData = ref(req.data)
+const sortTable = ref<{ index: number; direction: "descending" | "ascending" } | undefined>();
 
-async function displayData() {
-  data[0].data.splice(0, data[0].data.length - 1)
-  apiData.value = (await getMainView(currentPage.value)).data
+watch(sortTable, async (n) => {
+  await displayData(n);
+});
+
+async function displayData(sort?: typeof sortTable.value) {
+  // data[0].data.splice(0, data[0].data.length);
+
+  const req = await getMainView(currentPage.value, sort);
+
+  apiData.value = req.data;
+  count.value = req.count;
+
+  const newArr: string[][] = [];
+
   apiData.value?.forEach((el) => {
-    if (!(el.active_oop?.name && el.oop?.code && el.title && el.qualification && el.edu_form?.name))
-      return
-    data[0].data.push([
-      el.oop.code,
-      el.title.slice(el.title.indexOf(' ') + 1),
-      el.active_oop.name,
-      stringFirstToUpper(el.qualification),
-      el.edu_form.name.includes(' форма')
-        ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(' форма'))
-        : el.edu_form.name,
-      '100%'
-    ])
-  })
+    newArr.push([
+      el.oop?.code || "ㅤ",
+      el.title ? el.title.slice(el.title.indexOf(" ") + 1) : "",
+      el.active_oop?.name || "ㅤ",
+      stringFirstToUpper(el.qualification || "ㅤ"),
+      el.edu_form?.name
+        ? el.edu_form.name.includes(" форма")
+          ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(" форма"))
+          : el.edu_form.name
+        : "",
+      "100%"
+    ]);
+  });
+  data[0].data.value = newArr;
 }
+
+const institution = ref("");
+const department = ref("");
+const code = ref("");
+const form = ref("");
 
 watch(currentPage, async () => {
-  displayData()
-})
-
-onMounted(() => {
-  displayData()
-})
+  await displayData(sortTable.value);
+});
+onMounted(async () => {
+  await displayData();
+});
 </script>
 
 <template>
   <div class="home">
     <div class="home__filter">
       <KFilter placeholder="Институт" />
-      <KFilter placeholder="Кафедра" style="width: 250px" />
       <KFilter placeholder="Код направления" style="width: 200px" />
       <KFilter placeholder="Форма" style="width: 120px" />
       <KFilterResetIcon />
@@ -110,14 +112,15 @@ onMounted(() => {
     <div class="home__content">
       <template v-for="(v, i) of data" :key="i">
         <KTable
+          v-model:col-sort="sortTable"
           v-model:current-page="currentPage"
           :routing-handler="tableRouting"
           v-if="v.opened"
           :title="v.title"
           :subtitle="v.subtitle"
-          :pages="Math.ceil(req.count / 15)"
+          :pages="Math.ceil(count / 15)"
           :headers="v.headers"
-          :content="v.data"
+          :content="(v.data as any)"
         />
         <div class="home__content__close" v-else @click="data[i].opened = true">
           <div class="home__content__close__left">
@@ -132,11 +135,34 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-.table__body__column {
-  max-width: 230px !important;
-}
-
 .home {
+  .table__body {
+    &__column {
+      max-width: 230px !important;
+    }
+    > *:nth-child(1) {
+      max-width: 90px !important;
+    }
+    > *:nth-child(2) {
+      min-width: 230px;
+    }
+    > *:nth-child(3) {
+      min-width: 230px;
+    }
+    > *:nth-child(4) {
+      min-width: 230px;
+    }
+    > *:nth-child(5) {
+      width: 136px;
+      flex-grow: unset;
+    }
+    > *:nth-child(6) {
+      max-width: unset !important;
+      flex-grow: unset;
+      width: 120px;
+    }
+  }
+
   display: flex;
   flex-direction: column;
   gap: 20px;

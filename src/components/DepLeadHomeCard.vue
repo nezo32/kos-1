@@ -1,14 +1,14 @@
 <script setup lang="ts">
 defineProps<{
-  code: string
-  name: string
-  direction: string
-  form: string
-  graduate: string
-  filled: string
-  year: string
-  img?: string
-}>()
+  code: string;
+  name: string;
+  direction: string;
+  form: string;
+  graduate: string;
+  filled: string;
+  year: string;
+  img?: string;
+}>();
 </script>
 
 <template>
@@ -28,7 +28,7 @@ defineProps<{
         <p class="card__text">{{ form }}</p>
       </div>
       <div class="dep-lead__home__card__text__field">
-        <span class="breadcrumbs__text">Уровень образования</span>
+        <span class="breadcrumbs__text">Квалификация</span>
         <p class="card__text">{{ graduate }}</p>
       </div>
     </div>

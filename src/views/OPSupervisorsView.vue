@@ -1,45 +1,33 @@
 <script setup lang="ts">
-import ModalSetSupervisor from '@/components/modals/ModalSetSupervisor.vue'
-import { KFilter, KFilterResetIcon, KTable } from '@kosygin-rsu/components'
-import { reactive, ref, watch } from 'vue'
+import ModalSetSupervisor from "@/components/modals/ModalSetSupervisor.vue";
+import { KFilter, KFilterResetIcon, KTable } from "@kosygin-rsu/components";
+import { reactive, ref, watch } from "vue";
 
 const data = reactive([
-  ['38.03.04', 'Сервис', 'Фортепиано', 'Очная', 'Назначить'],
-  ['39.03.04', 'Социология', 'Информационные системы и технологии', 'Очно-заочная', 'Зуев П. И.'],
-  [
-    '20.03.01',
-    'Культурология',
-    'Фотоискусство и мультимедиадизайн',
-    'Очно-заочная',
-    'Высоцкий А. М.'
-  ],
-  [
-    '15.03.02',
-    'Информационные системы и технологии',
-    'Маркетинг и бренд-менеджмент',
-    'Очно-заочная',
-    'Назначить'
-  ]
-])
+  ["38.03.04", "Сервис", "Фортепиано", "Очная", "Назначить"],
+  ["39.03.04", "Социология", "Информационные системы и технологии", "Очно-заочная", "Зуев П. И."],
+  ["20.03.01", "Культурология", "Фотоискусство и мультимедиадизайн", "Очно-заочная", "Высоцкий А. М."],
+  ["15.03.02", "Информационные системы и технологии", "Маркетинг и бренд-менеджмент", "Очно-заочная", "Назначить"]
+]);
 
-const which = ref<string[]>([])
+const which = ref<string[]>([]);
 
-const modalActive = ref(false)
-const selected = ref('')
-const saved = ref(false)
+const modalActive = ref(false);
+const selected = ref("");
+const saved = ref(false);
 
 watch(saved, () => {
-  if (!saved.value) return
-  const changeInd = data.findIndex((el) => which.value.toString() == el.toString())
-  data[changeInd][data.length] = selected.value
-  selected.value = ''
-  modalActive.value = false
-  saved.value = false
-})
+  if (!saved.value) return;
+  const changeInd = data.findIndex((el) => which.value.toString() == el.toString());
+  data[changeInd][data.length] = selected.value;
+  selected.value = "";
+  modalActive.value = false;
+  saved.value = false;
+});
 
 function selectSupevisorHandler(data: string[]) {
-  modalActive.value = true
-  which.value = data
+  modalActive.value = true;
+  which.value = data;
 }
 </script>
 
@@ -47,12 +35,12 @@ function selectSupevisorHandler(data: string[]) {
   <div class="supervisors-op">
     <div class="supervisors-op__filters">
       <KFilter placeholder="Институт" />
-      <KFilter placeholder="Кафедра" style="width: 250px" />
       <KFilter placeholder="Код направления" style="width: 200px" />
       <KFilter placeholder="Уровень" style="width: 120px" />
       <KFilterResetIcon />
     </div>
     <KTable
+      :current-page="1"
       @select="selectSupevisorHandler"
       :headers="['Код', 'Направление подготовки', 'Профиль', 'Форма', 'Руководитель']"
       title="Назначение руководителей"
