@@ -135,7 +135,6 @@ export async function getMainView(page?: number, sort?: SortObject, filter?: Fil
         aggregate("plans", {
           query: {
             limit: 15,
-            page: page || 1,
             filter: filter ? filtering() : undefined,
             sort: sort ? [sorting()] : undefined
           },
