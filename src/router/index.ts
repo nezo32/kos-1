@@ -1,61 +1,60 @@
-import { usePermissionStore } from '@/stores'
-import { createRouter, createWebHistory } from 'vue-router'
-
-
+import { getOOPDocumentTitle } from "@/core";
+import { usePermissionStore } from "@/stores";
+import { createRouter, createWebHistory, type RouteLocationNormalized } from "vue-router";
 
 const checkDocumentEdit = () => {
-  const store = usePermissionStore()
-  return store.permission == 'Руководитель ООП' ? true : "/"
-}
+  const store = usePermissionStore();
+  return store.permission == "Руководитель ООП" ? true : "/";
+};
 
 const checkRPDEdit = () => {
-  const store = usePermissionStore()
-  return store.permission == 'Заведующий кафедры' || store.permission == 'Преподаватель' ? true : '/'
-}
+  const store = usePermissionStore();
+  return store.permission == "Заведующий кафедры" || store.permission == "Преподаватель" ? true : "/";
+};
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'Программы',
-      component: () => import('@/Bridge.vue'),
-      redirect: '/main',
+      path: "/",
+      name: "Программы",
+      component: () => import("@/Bridge.vue"),
+      redirect: "/main",
       meta: {
         breadcrumbs: "Программы"
       },
       children: [
         {
-          path: 'main',
-          name: 'Программы',
-          component: () => import('@/views/HomeView.vue'),
-          alias: '/'
+          path: "main",
+          name: "Программы",
+          component: () => import("@/views/HomeView.vue"),
+          alias: "/"
         },
         {
-          path: 'programs/:id',
+          path: "programs/:id",
           name: "Образовательная программа",
-          component: () => import('@/Bridge.vue'),
+          component: () => import("@/Bridge.vue"),
           meta: {
             breadcrumbs: "Образовательная программа"
           },
-          redirect: '/programs/:id/main',
+          redirect: "/programs/:id/main",
           children: [
             {
-              path: 'main',
+              path: "main",
               name: "Образовательная программа",
               component: () => import("@/views/EduProgramView.vue"),
-              alias: '/programs/:id',
+              alias: "/programs/:id"
             },
             {
-              path: 'work_discipline',
+              path: "work_discipline/:rpdId",
               name: "Рабочая программа дисциплины",
               component: () => import("@/views/WorkProgramDisView.vue"),
               meta: {
                 breadcrumbs: "Рабочая программа дисциплины"
-              },
+              }
             },
             {
-              path: 'work_practice',
+              path: "work_practice/:rpdId",
               name: "Рабочая программа практики",
               component: () => import("@/views/WorkProgramPracView.vue"),
               meta: {
@@ -63,7 +62,7 @@ const router = createRouter({
               }
             },
             {
-              path: 'work_discipline/edit',
+              path: "work_discipline/:rpdId/edit",
               name: "Рабочая программа дисциплины - редактирование",
               component: () => import("@/views/EditWorkDisciplineView.vue"),
               meta: {
@@ -72,7 +71,7 @@ const router = createRouter({
               beforeEnter: checkRPDEdit
             },
             {
-              path: 'work_practice/edit',
+              path: "work_practice/:rpdId/edit",
               name: "Рабочая программа практики - редактирование",
               component: () => import("@/views/EditWorkPracticeView.vue"),
               meta: {
@@ -80,8 +79,25 @@ const router = createRouter({
               },
               beforeEnter: checkRPDEdit
             },
-
             {
+              path: ":documentId",
+              name: "ООП Документ",
+              component: () => import("@/views/ViewDocumentView.vue"),
+              meta: {
+                name: async (r: RouteLocationNormalized) => await getOOPDocumentTitle(r.params.documentId as string),
+                breadcrumbs: "ООП Документ"
+              }
+            },
+            {
+              path: ":documentId/edit",
+              name: "ООП Документ - редактирование",
+              component: () => import("@/views/EditDocumentView.vue"),
+              meta: {
+                name: async (r: RouteLocationNormalized) => await getOOPDocumentTitle(r.params.documentId as string),
+                breadcrumbs: "ООП Документ"
+              }
+            }
+            /*{ 
               path: 'oop_annotation/edit',
               name: 'Аннотация ООП - редактирование',
               component: () => import("@/views/EditDocumentView.vue"),
@@ -217,32 +233,32 @@ const router = createRouter({
               meta: {
                 breadcrumbs: "Программа ГИА"
               },
-            },
+            }, */
           ]
-        },
+        }
       ]
     },
     {
-      path: '/op_supervisors',
-      name: 'Руководители ОП',
-      component: () => import('@/views/OPSupervisorsView.vue'),
+      path: "/op_supervisors",
+      name: "Руководители ОП",
+      component: () => import("@/views/OPSupervisorsView.vue"),
       meta: {
         breadcrumbs: "Руководители ОП"
       },
       beforeEnter: () => {
-        const store = usePermissionStore()
-        return store.permission == 'Оператор' ? true : "/"
+        const store = usePermissionStore();
+        return store.permission == "Оператор" ? true : "/";
       }
     },
     {
-      path: '/exit',
-      name: 'Выход',
-      component: () => import('@/views/ExitView.vue'),
+      path: "/exit",
+      name: "Выход",
+      component: () => import("@/views/ExitView.vue"),
       meta: {
         breadcrumbs: "Выход"
       }
     }
   ]
-})
+});
 
-export default router
+export default router;

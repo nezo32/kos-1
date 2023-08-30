@@ -1,14 +1,27 @@
 <script setup lang="ts">
-defineProps<{
+import { onMounted, onUpdated, ref } from "vue";
+import { getFilledPercents } from "@/core/main";
+
+const props = defineProps<{
   code: string;
   name: string;
   direction: string;
   form: string;
   graduate: string;
-  filled: string;
   year: string;
   img?: string;
+  id: string;
+  oopid: string;
 }>();
+
+const percent = ref("");
+
+onMounted(async () => {
+  percent.value = await getFilledPercents(props.id, props.oopid);
+});
+onUpdated(async () => {
+  percent.value = await getFilledPercents(props.id, props.oopid);
+});
 </script>
 
 <template>
@@ -39,7 +52,7 @@ defineProps<{
           <span>Документы образовательной</span>
           <span>программы заполнены на:</span>
         </span>
-        <p class="card__text">{{ filled }}</p>
+        <p class="card__text">{{ percent }}</p>
       </div>
     </div>
   </div>

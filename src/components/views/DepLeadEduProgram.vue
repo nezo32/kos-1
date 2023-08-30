@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { KTable } from "@kosygin-rsu/components";
+import { KNewTable, KTableTypes } from "@kosygin-rsu/components";
 import { useRoute, useRouter } from "vue-router";
-import { reactive, ref, watch } from "vue";
+import { ref, type HTMLAttributes } from "vue";
 import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
 import EmployeeCard from "@/components/EmployeeCard.vue";
 import DocumentsCard from "@/components/DocumentsCard.vue";
 import ModalSetSupervisor from "../modals/ModalSetSupervisor.vue";
 import { getPlanById } from "@/core";
+import { paginationDiscipline, paginationPractice } from "@/core/programs";
 import { stringFirstToUpper } from "@/utils";
 
 const route = useRoute();
@@ -16,19 +17,14 @@ const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
 
 const router = useRouter();
 
-const tableData = reactive([
-  ["Астрономия", "В разработке", "Отсутствует", "Отклонен", "Назначить"],
-  ["Гражданское строительство", "Отклонен", "Проверен", "Разработан", "Смирнова А. А."],
-  ["Генетика", "Отклонен", "Проверен", "Разработан", "Назначить"]
-]);
+const pageD = ref(1);
+const pageP = ref(1);
 
-function tableRoutingDisciplines(v: string[], ev?: MouseEvent) {
-  const content = (ev?.target as HTMLElement).textContent;
-  if (content != "Назначить") router.push(route.fullPath + "/work_discipline/edit");
+function tableRoutingDisciplines(_: any, v: { id: string }) {
+  router.push(route.fullPath + `/work_discipline/${v.id}/edit`);
 }
-function tableRoutingPractice(v: string[], ev?: MouseEvent) {
-  const content = (ev?.target as HTMLElement).textContent;
-  if (content != "Назначить") router.push(route.fullPath + "/work_practice/edit");
+function tableRoutingPractice(_: any, v: { id: string }) {
+  router.push(route.fullPath + `/work_practice/${v.id}/edit`);
 }
 
 const which = ref<string[]>([]);
@@ -41,19 +37,44 @@ function selectSupevisorHandler(data: string[]) {
   which.value = data;
 }
 
-watch(saved, () => {
-  if (!saved.value) return;
-  const changeInd = tableData.findIndex((el) => which.value.toString() == el.toString());
-  tableData[changeInd][tableData.length + 1] = selected.value;
-  selected.value = "";
-  modalActive.value = false;
-  saved.value = false;
-});
+const head: KTableTypes.TableHeadType<Record<string | number | symbol, string | null | undefined>> = {
+  name: {
+    title: "Дисциплина",
+    width: "444px"
+  },
+
+  program: {
+    title: "Программа",
+    width: "120px",
+    hideOrder: true
+  },
+  annotation: {
+    title: "Аннотация",
+    width: "150px",
+    hideOrder: true
+  },
+  fos: {
+    title: "ФОС",
+    width: "140px",
+    hideOrder: true
+  }
+};
+
+function applyStyle(content: string) {
+  const styles: HTMLAttributes["class"] = {
+    grey: content == "Отсутствует" || content == "В разработке",
+    red: content == "Отклонен",
+    green: content == "Проверен"
+  };
+  return styles;
+}
 </script>
 
 <template>
   <div class="dep-led-edu-program">
     <DepLeadHomeCard
+      :id="data!.id"
+      :oopid="data!.oop!.id"
       :code="data?.oop?.code || 'ㅤ'"
       :name="data?.title ? data?.title.slice(data?.title.indexOf(' ') + 1) : ''"
       :direction="data?.active_oop?.name || 'ㅤ'"
@@ -72,24 +93,44 @@ watch(saved, () => {
       <EmployeeCard />
       <DocumentsCard />
     </div>
-    <KTable
-      :current-page="1"
-      @select="selectSupevisorHandler"
-      :routing-handler="tableRoutingDisciplines"
-      :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
-      :pages="1"
+    <KNewTable
+      @row-click="tableRoutingDisciplines"
+      subtitle=""
+      :head="head"
       title="Рабочие программы дисциплин"
-      :content="tableData"
-    />
-    <KTable
-      :current-page="1"
-      @select="selectSupevisorHandler"
-      :routing-handler="tableRoutingPractice"
-      :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
-      :pages="1"
+      v-model:page="pageP"
+      :pagination="(page, max, search, order) => paginationDiscipline(id as string, page, max, search, order)"
+      style="width: 1040px !important; box-sizing: border-box"
+    >
+      <template #fos="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #annotation="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #program="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template></KNewTable
+    >
+    <KNewTable
+      @row-click="tableRoutingPractice"
+      subtitle=""
+      :head="head"
       title="Рабочие программы практик"
-      :content="tableData"
-    />
+      v-model:page="pageD"
+      :pagination="(page, max, search, order) => paginationPractice(id as string, page, max, search, order)"
+      style="width: 1040px !important; box-sizing: border-box"
+    >
+      <template #fos="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #annotation="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #program="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template></KNewTable
+    >
     <ModalSetSupervisor
       v-if="modalActive"
       v-model:active="modalActive"
@@ -100,6 +141,16 @@ watch(saved, () => {
 </template>
 
 <style lang="scss">
+.grey {
+  color: var(--unactive-text);
+}
+.red {
+  color: var(--rejected);
+}
+.green {
+  color: var(--resolved);
+}
+
 .dep-led-edu-program {
   display: flex;
   flex-direction: column;

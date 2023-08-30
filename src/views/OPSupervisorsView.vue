@@ -1,31 +1,29 @@
 <script setup lang="ts">
+import { getMainView, getMainFilter, type SortObject, type FilterObject } from "@/core";
+import { pagination } from "@/core/main";
+import { columnMapper } from "@/core/supervisors";
+import { KFilter, KFilterResetIcon, KNewTable, KActionButton } from "@kosygin-rsu/components";
+import { ref, shallowReactive, reactive, watch, onMounted } from "vue";
+import { stringFirstToUpper } from "@/utils";
 import ModalSetSupervisor from "@/components/modals/ModalSetSupervisor.vue";
-import { KFilter, KFilterResetIcon, KTable } from "@kosygin-rsu/components";
-import { reactive, ref, watch } from "vue";
+import Filter from "@/components/Filter.vue";
+import type { DefaultItem } from "@directus/sdk";
+import type { Plans } from "@/types/directus";
 
-const data = reactive([
-  ["38.03.04", "Сервис", "Фортепиано", "Очная", "Назначить"],
-  ["39.03.04", "Социология", "Информационные системы и технологии", "Очно-заочная", "Зуев П. И."],
-  ["20.03.01", "Культурология", "Фотоискусство и мультимедиадизайн", "Очно-заочная", "Высоцкий А. М."],
-  ["15.03.02", "Информационные системы и технологии", "Маркетинг и бренд-менеджмент", "Очно-заочная", "Назначить"]
-]);
+const which = ref<DefaultItem<Plans>>();
 
-const which = ref<string[]>([]);
-
+const page = ref(1);
 const modalActive = ref(false);
 const selected = ref("");
 const saved = ref(false);
 
 watch(saved, () => {
   if (!saved.value) return;
-  const changeInd = data.findIndex((el) => which.value.toString() == el.toString());
-  data[changeInd][data.length] = selected.value;
-  selected.value = "";
   modalActive.value = false;
   saved.value = false;
 });
 
-function selectSupevisorHandler(data: string[]) {
+function selectSupevisorHandler(data: DefaultItem<Plans>) {
   modalActive.value = true;
   which.value = data;
 }
@@ -33,21 +31,35 @@ function selectSupevisorHandler(data: string[]) {
 
 <template>
   <div class="supervisors-op">
-    <div class="supervisors-op__filters">
-      <KFilter placeholder="Институт" />
-      <KFilter placeholder="Код направления" style="width: 200px" />
-      <KFilter placeholder="Уровень" style="width: 120px" />
-      <KFilterResetIcon />
-    </div>
-    <KTable
-      :current-page="1"
-      @select="selectSupevisorHandler"
-      :headers="['Код', 'Направление подготовки', 'Профиль', 'Форма', 'Руководитель']"
-      title="Назначение руководителей"
+    <!-- <div class="supervisors-op__filters">
+      <KFilter placeholder="Институт" v-model="institution" :content="iDropDown" :trigger="filterTrigger" />
+      <Filter placeholder="Код направления" v-model="code" style="width: 200px" />
+      <KFilter placeholder="Форма" v-model="form" style="width: 180px" :content="fDropDown" :trigger="filterTrigger" />
+      <KFilterResetIcon @click="filterTrigger = !filterTrigger" />
+    </div> -->
+    <KNewTable
+      v-model:page="page"
+      title="Основные образовательные программы"
       subtitle="2021 год"
-      :pages="54"
-      :content="data"
-    />
+      :head="{
+        'oop.code': { title: 'Код', width: '90px' },
+        'oop.name': { title: 'Направление подготовки', width: '255px' },
+        'active_oop.name': { title: 'Профиль', width: '255px' },
+        qualification: { title: 'Квалификация', width: '150px' },
+        'edu_form.name': { title: 'Форма', width: '140px' },
+        faculty: { title: 'Руководитель', width: '140px', hideOrder: true }
+      }"
+      :pagination="pagination"
+      :column-mapper="columnMapper"
+      style="width: 1040px !important; box-sizing: border-box"
+    >
+      <template #faculty="{ content, data }">
+        <span v-if="!!content"> {{ content }} </span>
+        <span v-else>
+          <KActionButton content="Назначить" @click="selectSupevisorHandler(data)"></KActionButton>
+        </span>
+      </template>
+    </KNewTable>
   </div>
   <ModalSetSupervisor
     v-if="modalActive"
@@ -59,6 +71,19 @@ function selectSupevisorHandler(data: string[]) {
 
 <style lang="scss">
 .supervisors-op {
+  .table__row {
+    align-items: center;
+  }
+  .action__button {
+    button {
+      border: 1px solid var(--elements);
+      padding: 1.5px 10px;
+      line-height: normal;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
   display: flex;
   flex-direction: column;
   gap: 20px;

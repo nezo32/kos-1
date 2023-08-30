@@ -5,21 +5,42 @@ import DocumentsCard from "@/components/DocumentsCard.vue";
 import DescriptionOOP from "@/components/edit/DescriptionOOP.vue";
 import EditDocument from "@/components/placeholder/EditDocument.vue";
 
-import { ref } from "vue";
-import { getPlanById } from "@/core";
+import { ref, watch, onUpdated } from "vue";
+import { db, getPlanById } from "@/core";
+import { readItems } from "@directus/sdk";
 import { stringFirstToUpper } from "@/utils";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 
+const docTypeNameMap = ref<Map<string, string | null | undefined>>(new Map());
+
 const id = route.params.id;
-const title = route.meta.breadcrumbs as string;
+const oopFileTypeId = route.params.documentId as string;
 const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
+
+const reqFilesTypes = await db.request(
+  readItems("oop_files_types", {
+    fields: ["id", "title"]
+  })
+);
+
+reqFilesTypes.forEach((el) => {
+  docTypeNameMap.value?.set(el.id, el.title);
+});
+
+const view = ref(docTypeNameMap.value?.get(oopFileTypeId));
+
+watch(route, (n) => {
+  view.value = docTypeNameMap.value?.get(n.params.documentId as string);
+});
 </script>
 
 <template>
   <div class="edit-document">
     <DepLeadHomeCard
+      :id="data!.id"
+      :oopid="data!.oop!.id"
       :code="data?.oop?.code || 'ㅤ'"
       :name="data?.title ? data?.title.slice(data?.title.indexOf(' ') + 1) : ''"
       :direction="data?.active_oop?.name || 'ㅤ'"
@@ -38,7 +59,8 @@ const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
       <EmployeeCard />
       <DocumentsCard />
     </div>
-    <EditDocument :to="(id as string)" :title="title" />
+    <!-- <EditDocument :plan-id="(id as string)" :oop-file-type-id="(oopFileTypeId as string)" /> -->
+    <DescriptionOOP v-if="view == 'Аннотация ООП'" />
   </div>
 </template>
 

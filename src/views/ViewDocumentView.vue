@@ -1,24 +1,42 @@
 <script setup lang="ts">
-import { KTable } from "@kosygin-rsu/components";
 import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
 import EmployeeCard from "@/components/EmployeeCard.vue";
 import DocumentsCard from "@/components/DocumentsCard.vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import Document from "@/components/Document.vue";
+import { getURL } from "@/core";
 
-import { ref } from "vue";
-import { getPlanById } from "@/core";
 import { stringFirstToUpper } from "@/utils";
+import { onMounted, onUpdated, ref, watch } from "vue";
+import { getPlanById } from "@/core";
+import type { Plans } from "@/types/directus";
 
 const route = useRoute();
 
-const id = route.params.id;
-const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
+const id = ref(route.params.id);
+const data = ref<Plans | undefined>((await getPlanById(typeof id.value == "string" ? id.value : undefined)) as Plans);
+
+const url = ref<string | undefined>();
+
+async function refresh() {
+  id.value = route.params.id as string;
+  data.value = (await getPlanById(typeof id.value == "string" ? id.value : undefined)) as Plans;
+  url.value = await getURL(id.value, route.params.documentId as string);
+}
+
+onMounted(async () => {
+  await refresh();
+});
+onUpdated(async () => {
+  await refresh();
+});
 </script>
 
 <template>
   <div class="view-document">
     <DepLeadHomeCard
+      :id="data!.id"
+      :oopid="data!.oop!.id"
       :code="data?.oop?.code || 'ㅤ'"
       :name="data?.title ? data?.title.slice(data?.title.indexOf(' ') + 1) : ''"
       :direction="data?.active_oop?.name || 'ㅤ'"
@@ -37,7 +55,7 @@ const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
       <EmployeeCard />
       <DocumentsCard />
     </div>
-    <Document pdf="https://ncu.rcnpv.com.tw/Uploads/20131231103232738561744.pdf" />
+    <Document :pdf="url" />
   </div>
 </template>
 

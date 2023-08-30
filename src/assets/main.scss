@@ -1,4 +1,4 @@
-@import './modal.scss';
+@import "./modal.scss";
 body {
   margin: 0;
   background: var(--background);
@@ -16,6 +16,12 @@ body {
   &::-webkit-scrollbar-thumb {
     background-color: #303030;
     /* color of the scroll thumb */
+  }
+
+  .custom__input {
+    input {
+      outline: none;
+    }
   }
 }
 

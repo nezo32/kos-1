@@ -1,60 +1,56 @@
 <script setup lang="ts">
-import BasicTableForms from '@/components/BasicTableForms.vue'
-import Textarea from '@/components/Textarea.vue'
-import { KForms } from '@kosygin-rsu/components'
-import { v4 as uuidv4 } from 'uuid'
-import { reactive, watch } from 'vue'
+import BasicTableForms from "@/components/BasicTableForms.vue";
+import Textarea from "@/components/Textarea.vue";
+import { KForms } from "@kosygin-rsu/components";
+import { v4 as uuidv4 } from "uuid";
+import { reactive, watch } from "vue";
 
 type DataType = {
-  name: string
-  key: string
+  name: string;
+  key: string;
   data: {
-    key: string
-    opk: string
+    key: string;
+    opk: string;
     data: {
-      code: string
-      key: string
-    }[]
-  }[]
-}
+      code: string;
+      key: string;
+    }[];
+  }[];
+};
 
 const getNewGeneral: () => DataType = () => ({
-  name: '',
+  name: "",
   key: uuidv4(),
   data: reactive([getNewInner()])
-})
-const getNewInner = () => ({ key: uuidv4(), opk: '', data: reactive([getNewSmaller()]) })
-const getNewSmaller = () => ({ key: uuidv4(), code: '' })
+});
+const getNewInner = () => ({ key: uuidv4(), opk: "", data: reactive([getNewSmaller()]) });
+const getNewSmaller = () => ({ key: uuidv4(), code: "" });
 
-const data = reactive<DataType[]>([getNewGeneral()])
+const data = reactive<DataType[]>([getNewGeneral()]);
 
 watch(data, () => {
   data.forEach((e, i) => {
     e.data.forEach((elem, ind) => {
       elem.data.forEach((element, index) => {
-        if (element.code == '' && index != elem.data.length - 1) {
-          data[i].data[ind].data.splice(index, 1)
+        if (element.code == "" && index != elem.data.length - 1) {
+          data[i].data[ind].data.splice(index, 1);
         }
-      })
-    })
+      });
+    });
     e.data.forEach((elem, ind) => {
-      if (
-        elem.opk == '' &&
-        ind != e.data.length - 1 &&
-        elem.data.every((element) => element.code == '')
-      ) {
-        data[i].data.splice(ind, 1)
+      if (elem.opk == "" && ind != e.data.length - 1 && elem.data.every((element) => element.code == "")) {
+        data[i].data.splice(ind, 1);
       }
-    })
+    });
     if (
-      e.name == '' &&
+      e.name == "" &&
       i != data.length - 1 &&
-      e.data.every((elem) => elem.data.every((element) => element.code == '') && elem.opk == '')
+      e.data.every((elem) => elem.data.every((element) => element.code == "") && elem.opk == "")
     ) {
-      data.splice(i, 1)
+      data.splice(i, 1);
     }
-  })
-})
+  });
+});
 </script>
 
 <template>
@@ -76,24 +72,15 @@ watch(data, () => {
         <div class="tf2__body__data" v-for="(v, i) in data" :key="v.key">
           <KForms type="input" :content="[]" v-model="v.name" />
           <div class="tf2__body__data__content">
-            <div
-              class="tf2__body__data__content__inner"
-              v-for="(val, ind) in v.data"
-              :key="val.key"
-            >
+            <div class="tf2__body__data__content__inner" v-for="(val, ind) in v.data" :key="val.key">
               <Textarea v-model="val.opk" />
               <div class="tf2__body__data__content__inner__right">
                 <section v-for="(value, index) in val.data" :key="value.key">
                   <Textarea v-model="value.code" />
-                  <div
-                    class="tf2__body__data__content__inner__right__add"
-                    v-if="index == val.data.length - 1"
-                  >
+                  <div class="tf2__body__data__content__inner__right__add" v-if="index == val.data.length - 1">
                     <div
                       class="tf2__body__data__content__inner__right__add__text"
-                      @click="
-                        value.code != '' ? data[i].data[ind].data.push(getNewSmaller()) : true
-                      "
+                      @click="value.code != '' ? data[i].data[ind].data.push(getNewSmaller()) : true"
                     >
                       <span>+</span>
                       Добавить ИД-ОПК
@@ -106,9 +93,7 @@ watch(data, () => {
               <p></p>
               <div
                 class="tf2__body__data__content__add__text"
-                @click="
-                  v.data[v.data.length - 1].opk != '' ? data[i].data.push(getNewInner()) : true
-                "
+                @click="v.data[v.data.length - 1].opk != '' ? data[i].data.push(getNewInner()) : true"
               >
                 <span>+</span>
                 Добавить ОПК
@@ -119,10 +104,7 @@ watch(data, () => {
         </div>
         <div class="tf2__body__add">
           <p></p>
-          <div
-            class="tf2__body__add__text"
-            @click="data[data.length - 1].name ? data.push(getNewGeneral()) : true"
-          >
+          <div class="tf2__body__add__text" @click="data[data.length - 1].name ? data.push(getNewGeneral()) : true">
             <span>+</span>
             Добавить общепрофессиональную компетенцию
           </div>

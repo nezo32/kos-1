@@ -1,18 +1,49 @@
-import { Directus, type Sort } from "@directus/sdk";
+import { createDirectus, type QuerySort, type QueryFilter } from "@directus/sdk";
+import { authentication, rest, readItems, readItem, realtime, aggregate, uploadFiles, createItem } from "@directus/sdk";
+
 import type { CustomDirectusTypes, Plans } from "@/types/directus";
 
-const db = new Directus<CustomDirectusTypes>("/api");
+export const db = createDirectus<CustomDirectusTypes>("http://localhost:5173/api")
+  .with(authentication())
+  .with(realtime())
+  .with(rest());
 
-await db.auth.login({
-  email: "l.nik801.l@gmail.com",
-  password: "admin"
-});
+await db.login("l.nik801.l@gmail.com", "admin", {});
 
-type SortTypes = Sort<Plans>[0];
-type MainViewSortType = () => SortTypes;
+export const OopFilesTypesCount =
+  (
+    await db.request(
+      aggregate("oop_files_types", {
+        aggregate: { count: "*" }
+      })
+    )
+  )[0].count ?? 0;
+export const DisciplinesFilesTypesCount =
+  (
+    await db.request(
+      aggregate("disciplines_files_types", {
+        aggregate: { count: "*" }
+      })
+    )
+  )[0].count ?? 0;
 
-export async function getMainView(page?: number, sort?: { index: number; direction: "descending" | "ascending" }) {
-  const sorting: MainViewSortType = () => {
+export const DisciplinesFileTypes = await db.request(
+  readItems("disciplines_files_types", {
+    fields: ["title", "id"]
+  })
+);
+
+type SortTypes = QuerySort<CustomDirectusTypes, Plans>;
+type FilterTypes = QueryFilter<CustomDirectusTypes, Plans>;
+
+type SortTypeFunc = () => SortTypes;
+type FilterTypeFunc = () => FilterTypes;
+
+export type SortObject = { index: number; direction: "descending" | "ascending" };
+export type FilterObject = { institution?: string; code?: string; form?: string };
+
+export async function getMainView(page?: number, sort?: SortObject, filter?: FilterObject) {
+  const sorting: SortTypeFunc = () => {
     let target: SortTypes = "-active_oop";
 
     if (sort?.direction == "ascending") {
@@ -60,73 +91,340 @@ export async function getMainView(page?: number, sort?: { index: number; directi
     }
     return target;
   };
+  const filtering: FilterTypeFunc = () => {
+    let final: FilterTypes = {};
 
-  const plans = await db.items("plans").readByQuery({
-    fields: [
-      // @ts-ignore
-      "oop.code",
-      "title",
-      "qualification",
-      // @ts-ignore
-      "edu_form.name",
-      // @ts-ignore
-      "active_oop.name",
-      "id"
-    ],
-    limit: 15,
-    page: page || 1,
-    meta: "total_count",
-    sort: sort ? [sorting()] : undefined
-  });
+    if (filter?.code) {
+      final = Object.assign({ oop: { code: { _contains: filter.code } } }, final);
+    }
+    if (filter?.form) {
+      final = Object.assign({ edu_form: { name: { _contains: filter.form } } }, final);
+    }
+    if (filter?.institution) {
+      final = Object.assign({ faculty: { name: { _contains: filter.institution } } }, final);
+    }
 
-  return { data: plans.data, count: plans.meta?.total_count ?? 0 };
+    return final;
+  };
+
+  const plans = await db.request(
+    readItems("plans", {
+      fields: [
+        // @ts-ignore
+        "oop.code",
+        "title",
+        "qualification",
+        // @ts-ignore
+        "edu_form.name",
+        // @ts-ignore
+        "active_oop.name",
+        "id",
+        //@ts-ignore
+        "oop.id"
+      ],
+      limit: 15,
+      page: page || 1,
+      filter: filter ? filtering() : undefined,
+      sort: sort ? [sorting()] : undefined
+    })
+  );
+
+  const count =
+    (
+      await db.request(
+        aggregate("plans", {
+          query: {
+            limit: 15,
+            page: page || 1,
+            filter: filter ? filtering() : undefined,
+            sort: sort ? [sorting()] : undefined
+          },
+          aggregate: {
+            count: "*"
+          }
+        })
+      )
+    )[0].count ?? 0;
+
+  return { data: plans, count: Number(count) };
 }
 
 export async function getPlanById(id?: string) {
   if (!id) return;
-  const data = await db.items("plans").readOne(id, {
-    fields: [
-      // @ts-ignore
-      "oop.code",
-      "title",
-      "qualification",
-      // @ts-ignore
-      "edu_form.name",
-      // @ts-ignore
-      "active_oop.name",
-      "id"
-    ]
-  });
+  const data = await db.request(
+    readItem("plans", id, {
+      fields: [
+        // @ts-ignore
+        "oop.code",
+        "title",
+        "qualification",
+        // @ts-ignore
+        "edu_form.name",
+        // @ts-ignore
+        "active_oop.name",
+        // @ts-ignore
+        "id",
+        // @ts-ignore
+
+        "oop.id"
+      ]
+    })
+  );
 
   return data;
 }
 
-export async function uploadFile(title: string, to: string, file: File) {
+export async function uploadFile(planId: string, file: File, type: string) {
   const form = new FormData();
   form.append(file.name, file);
-  const uploadedFile = await db.files.createOne(form);
+  const uploadedFile = await db.request(uploadFiles(form));
   if (!uploadedFile) return;
 
-  const id = (
-    await db.items("oop_files_types").createOne({
-      title: title
+  const plan = await db.request(
+    readItem("plans", planId, {
+      fields: [
+        //@ts-ignore
+        "oop.id"
+      ]
     })
-  )?.id;
+  );
 
+  if (!plan?.oop?.id) return;
+
+  await db.request(
+    createItem("oop_files", {
+      type: type as any,
+      oop: plan.oop.id as any,
+      file: uploadedFile.id as any
+    })
+  );
+}
+
+export async function uploadRpdFile(disciplineId: string, file: File, type: string) {
+  const form = new FormData();
+  form.append(file.name, file);
+  const uploadedFile = await db.request(uploadFiles(form));
+  if (!uploadedFile) return;
+
+  await db.request(
+    createItem("disciplines_files", {
+      type: type as any,
+      discipline: disciplineId as any,
+      file: uploadedFile.id as any
+    })
+  );
+}
+
+export async function getMainFilter() {
+  const forms = await db.request(
+    readItems("edu_forms", {
+      fields: ["name"],
+      sort: ["name"]
+    })
+  );
+  const institution = await db.request(
+    readItems("faculties", {
+      fields: ["name"],
+      filter: {
+        plans: {
+          _nnull: true
+        }
+      },
+      sort: ["name"]
+    })
+  );
+
+  return { forms, institution };
+}
+
+export async function getEduProgramPractice(sort: "descending" | "ascending" | undefined, id?: string, page?: number) {
   if (!id) return;
+  const practice = await db.request(
+    readItems("disciplines", {
+      fields: ["name", "id"],
+      filter: {
+        //@ts-ignore
+        plan: id,
+        //@ts-ignore
+        object_type: {
+          name: {
+            _contains: "Практики"
+          }
+        },
+        //@ts-ignore
+        object_view: {
+          name: {
+            _eq: "Базовая"
+          }
+        }
+      },
+      limit: 15,
+      sort: sort ? (sort == "ascending" ? ["name"] : ["-name"]) : undefined,
+      page: page || 1
+    })
+  );
 
-  const oop = await db.items("plans").readOne(to, {
-    fields: [
-      //@ts-ignore
-      "oop.id"
-    ]
-  });
+  const pCount =
+    (
+      await db.request(
+        aggregate("disciplines", {
+          aggregate: { count: "*" },
+          query: {
+            fields: ["name", "id"],
+            filter: {
+              //@ts-ignore
+              plan: id,
+              //@ts-ignore
+              object_type: {
+                name: {
+                  _contains: "Практики"
+                }
+              },
+              //@ts-ignore
+              object_view: {
+                name: {
+                  _eq: "Базовая"
+                }
+              }
+            },
+            limit: 15,
+            sort: sort ? (sort == "ascending" ? ["name"] : ["-name"]) : undefined,
+            page: page || 1
+          }
+        })
+      )
+    )[0].count ?? 0;
 
-  if (!oop?.oop?.id) return;
+  return {
+    practice,
+    pCount
+  };
+}
+export async function getEduProgramDiscipline(
+  sort: "descending" | "ascending" | undefined,
+  id?: string,
+  page?: number
+) {
+  if (!id) return;
+  const disciplines = await db.request(
+    readItems("disciplines", {
+      fields: ["name", "id"],
+      filter: {
+        //@ts-ignore
+        plan: id,
+        //@ts-ignore
+        object_type: {
+          name: {
+            _contains: "Дисциплины"
+          }
+        },
+        //@ts-ignore
+        object_view: {
+          name: {
+            _eq: "Базовая"
+          }
+        }
+      },
+      limit: 15,
+      sort: sort ? (sort == "ascending" ? ["name"] : ["-name"]) : undefined,
+      page: page || 1
+    })
+  );
 
-  await db.items("oop_files").createOne({
-    type: id as any,
-    oop: oop.oop.id as any,
-    file: uploadedFile.id as any
-  });
+  const dCount =
+    (
+      await db.request(
+        aggregate("disciplines", {
+          aggregate: { count: "*" },
+          query: {
+            fields: ["name", "id"],
+            filter: {
+              //@ts-ignore
+              plan: id,
+              //@ts-ignore
+              object_type: {
+                name: {
+                  _contains: "Дисциплины"
+                }
+              },
+              //@ts-ignore
+              object_view: {
+                name: {
+                  _eq: "Базовая"
+                }
+              }
+            },
+            limit: 15,
+            sort: sort ? (sort == "ascending" ? ["name"] : ["-name"]) : undefined,
+            page: page || 1
+          }
+        })
+      )
+    )[0].count ?? 0;
+
+  return {
+    disciplines,
+    dCount
+  };
+}
+
+export async function getOOPDocumentsTypes() {
+  const types = await db.request(
+    readItems("oop_files_types", {
+      limit: -1,
+      fields: ["title", "id", "status"],
+      sort: ["title"]
+    })
+  );
+  return types;
+}
+
+export async function getOOPDocumentTitle(id: string) {
+  const name = await db.request(readItem("oop_files_types", id, { fields: ["title"] }));
+  return name?.title;
+}
+
+export async function getOOPDocumentUploadedById(oopId: string, documentTypeId: string) {
+  const instance = await db.request(
+    readItems("oop_files", {
+      filter: {
+        //@ts-ignore
+        oop: oopId,
+        //@ts-ignore
+        type: documentTypeId
+      }
+    })
+  );
+  return instance[0];
+}
+
+export async function getOOPDocumentsUploaded(planId: string) {
+  const instance = await db.request(
+    readItems("oop_files", {
+      filter: {
+        oop: {
+          //@ts-ignore
+          plans: planId
+        }
+      }
+    })
+  );
+  return instance || [];
+}
+
+export async function getURL(planId: string, documentTypeId: string) {
+  const a = await db.request(
+    readItems("oop_files", {
+      filter: {
+        oop: {
+          //@ts-ignore
+          plans: planId
+        },
+        //@ts-ignore
+        type: documentTypeId
+      }
+    })
+  );
+  if (a.length == 0) return undefined;
+  return `https://accreditation.rguk.local/assets/${a[0].file}?access_token=${await db.getToken()}`;
 }

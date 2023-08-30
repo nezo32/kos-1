@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { KTable } from "@kosygin-rsu/components";
+import { KNewTable, KTableTypes } from "@kosygin-rsu/components";
 import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
 import EmployeeCard from "@/components/EmployeeCard.vue";
 import DocumentsCard from "@/components/DocumentsCard.vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePermissionStore } from "@/stores";
-import { ref } from "vue";
+import { ref, type HTMLAttributes } from "vue";
 import { getPlanById } from "@/core";
 import { stringFirstToUpper } from "@/utils";
+import { paginationDiscipline, paginationPractice } from "@/core/programs";
+import type { DefaultItem } from "@directus/sdk";
+import type { Disciplines } from "@/types/directus";
 
 const route = useRoute();
 
@@ -17,30 +20,58 @@ const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
 const store = usePermissionStore();
 const router = useRouter();
 
-const pageT1 = ref(1);
-const pageT2 = ref(1);
+const pageP = ref(1);
+const pageD = ref(1);
 
-const tableData = [
-  ["Астрономия", "В разработке", "Отсутствует", "Отклонен", "Не назначен"],
-  ["Гражданское строительство", "Отклонен", "Проверен", "Разработан", "Смирнова А. А."],
-  ["Генетика", "Отклонен", "Проверен", "Разработан", "Смирнова А. А."]
-];
-
-function tableRoutingDisciplines(v: string[]) {
+function tableRoutingDisciplines(e: MouseEvent, v: { id: string }) {
   store.permission == "Преподаватель"
-    ? router.push(route.fullPath + "/work_discipline/edit")
-    : router.push(route.fullPath + "/work_discipline");
+    ? router.push(route.fullPath + `/work_discipline/${v.id}/edit`)
+    : router.push(route.fullPath + `/work_discipline/${v.id}`);
 }
-function tableRoutingPractice(v: string[]) {
+function tableRoutingPractice(e: MouseEvent, v: { id: string }) {
   store.permission == "Преподаватель"
-    ? router.push(route.fullPath + "/work_practice/edit")
-    : router.push(route.fullPath + "/work_practice");
+    ? router.push(route.fullPath + `/work_practice/${v.id}/edit`)
+    : router.push(route.fullPath + `/work_practice/${v.id}`);
+}
+
+const head: KTableTypes.TableHeadType<Record<string | number | symbol, string | null | undefined>> = {
+  name: {
+    title: "Дисциплина",
+    width: "444px"
+  },
+
+  program: {
+    title: "Программа",
+    width: "120px",
+    hideOrder: true
+  },
+  annotation: {
+    title: "Аннотация",
+    width: "150px",
+    hideOrder: true
+  },
+  fos: {
+    title: "ФОС",
+    width: "140px",
+    hideOrder: true
+  }
+};
+
+function applyStyle(content: string) {
+  const styles: HTMLAttributes["class"] = {
+    grey: content == "Отсутствует" || content == "В разработке",
+    red: content == "Отклонен",
+    green: content == "Проверен"
+  };
+  return styles;
 }
 </script>
 
 <template>
   <div class="edu-program">
     <DepLeadHomeCard
+      :id="data!.id"
+      :oopid="data!.oop!.id"
       :code="data?.oop?.code || 'ㅤ'"
       :name="data?.title ? data?.title.slice(data?.title.indexOf(' ') + 1) : ''"
       :direction="data?.active_oop?.name || 'ㅤ'"
@@ -59,26 +90,58 @@ function tableRoutingPractice(v: string[]) {
       <EmployeeCard />
       <DocumentsCard />
     </div>
-    <KTable
-      v-model:current-page="pageT1"
-      :routing-handler="tableRoutingDisciplines"
-      :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
-      :pages="1"
+    <KNewTable
+      @row-click="tableRoutingDisciplines"
+      subtitle=""
+      :head="head"
       title="Рабочие программы дисциплин"
-      :content="tableData"
-    />
-    <KTable
-      v-model:current-page="pageT2"
-      :routing-handler="tableRoutingPractice"
-      :headers="['Дисциплина', 'Аннотация', 'Программа', 'ФОС', 'Ответственный']"
-      :pages="1"
+      v-model:page="pageP"
+      :pagination="(page, max, search, order) => paginationDiscipline(id as string, page, max, search, order)"
+      style="width: 1040px !important; box-sizing: border-box"
+    >
+      <template #fos="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #annotation="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #program="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+    </KNewTable>
+    <KNewTable
+      @row-click="tableRoutingPractice"
+      subtitle=""
+      :head="head"
       title="Рабочие программы практик"
-      :content="tableData"
-    />
+      v-model:page="pageD"
+      :pagination="(page, max, search, order) => paginationPractice(id as string, page, max, search, order)"
+      style="width: 1040px !important; box-sizing: border-box"
+    >
+      <template #fos="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #annotation="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+      <template #program="{ content }">
+        <span :class="applyStyle(content)">{{ content }}</span>
+      </template>
+    </KNewTable>
   </div>
 </template>
 
 <style scoped lang="scss">
+.grey {
+  color: var(--unactive-text);
+}
+.red {
+  color: var(--rejected);
+}
+.green {
+  color: var(--resolved);
+}
+
 .edu-program {
   display: flex;
   flex-direction: column;

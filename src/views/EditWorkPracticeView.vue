@@ -3,32 +3,42 @@ import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
 import EmployeeCard from "@/components/EmployeeCard.vue";
 import DocumentsCard from "@/components/DocumentsCard.vue";
 import EditRPD from "@/components/EditRPD.vue";
-import EditDocument from "@/components/placeholder/EditDocument.vue";
+import EditRPDDocument from "@/components/placeholder/EditRPDDocument.vue";
 
 import { KSwitchButton } from "@kosygin-rsu/components";
-import { ref, nextTick } from "vue";
-import { getPlanById } from "@/core";
+import { ref, onMounted } from "vue";
+import { getPlanById, DisciplinesFileTypes } from "@/core";
 import { stringFirstToUpper } from "@/utils";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 
 const id = route.params.id;
+const disciplineId = route.params.rpdId as string;
 const title = route.meta.breadcrumbs as string;
 const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
 
 const documentSelector = ref([true, false, false]);
+const currentFileId = ref("");
 
-async function changeDocument(ind: number) {
+function changeDocument(ind: number) {
   documentSelector.value = [false, false, false];
-  await nextTick();
   documentSelector.value[ind] = true;
+  if (ind == 0) currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "Программа")?.id ?? "";
+  if (ind == 1) currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "Аннотация")?.id ?? "";
+  if (ind == 2) currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "ФОС")?.id ?? "";
 }
+
+onMounted(() => {
+  currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "Программа")?.id ?? "";
+});
 </script>
 
 <template>
   <div class="edit-rpd">
     <DepLeadHomeCard
+      :id="data!.id"
+      :oopid="data!.oop!.id"
       :code="data?.oop?.code || 'ㅤ'"
       :name="data?.title ? data?.title.slice(data?.title.indexOf(' ') + 1) : ''"
       :direction="data?.active_oop?.name || 'ㅤ'"
@@ -60,8 +70,40 @@ async function changeDocument(ind: number) {
         @click="changeDocument(2)"
       />
     </div>
-    <EditDocument :to="(id as string)" :title="title" />
+    <EditRPDDocument :discipline-id="disciplineId" :discipline-file-type="currentFileId" />
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss">
+.edit-rpd {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  &__inner {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+
+    > * {
+      width: calc((100% - 20px) / 2);
+    }
+  }
+  &__selector {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+
+    > .switch__button {
+      width: 100%;
+      > * {
+        width: 100%;
+        padding: 12px 10px !important;
+      }
+    }
+
+    border-radius: 20px;
+    background: var(--white);
+    padding: 10px 20px;
+  }
+}
+</style>

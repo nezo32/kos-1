@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { KFilter, KFilterResetIcon } from "@kosygin-rsu/components";
+import { KFilter, KFilterResetIcon, KPageSwitcher } from "@kosygin-rsu/components";
 import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
 import { useRouter } from "vue-router";
-import { getMainView } from "@/core";
+import { db, getMainView, type FilterObject } from "@/core";
 import { stringFirstToUpper } from "@/utils";
-import { onMounted, ref, shallowRef } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
+import { readItems } from "@directus/sdk";
 
 const router = useRouter();
 
@@ -15,15 +16,39 @@ const sortTable = ref<{ index: number; direction: "descending" | "ascending" } |
 const currentPage = ref(1);
 const count = ref(0);
 
-async function displayData(sort?: typeof sortTable.value) {
-  const req = await getMainView(currentPage.value, sort);
+watch(currentPage, async () => {
+  await displayData();
+});
+
+const codeFilter = ref<string>();
+const codeDD = ref(
+  (
+    await db.request(
+      readItems("plans", {
+        //@ts-ignore
+        fields: ["oop.code"],
+        //@ts-ignore
+        sort: ["oop.code"]
+      })
+    )
+  )
+    ?.map((el) => el.oop?.code || "")
+    .filter((value, index, arr) => arr.indexOf(value) === index) ?? []
+);
+
+watch(codeFilter, async (n) => {
+  await displayData({ code: n });
+});
+
+async function displayData(filter?: FilterObject) {
+  const req = await getMainView(currentPage.value, { index: 0, direction: "ascending" }, filter);
 
   apiData.value = req.data;
-  count.value = req.count;
+  count.value = Math.ceil(req.count / 15);
 
   const newArr: string[][] = [];
 
-  apiData.value?.forEach((el) => {
+  apiData.value?.forEach(async (el) => {
     newArr.push([
       el.oop?.code || "",
       el.title ? el.title.slice(el.title.indexOf(" ") + 1) : "",
@@ -34,27 +59,34 @@ async function displayData(sort?: typeof sortTable.value) {
           ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(" форма"))
           : el.edu_form.name
         : "",
-      "100%",
-      el.id
+      "",
+      el.id,
+      el.oop!.id
     ]);
   });
   data.value = newArr;
 }
 
-onMounted(() => {
-  displayData();
+onMounted(async () => {
+  await displayData();
 });
 </script>
 
 <template>
   <div class="dep-lead-home">
-    <div class="dep-lead-home__filter">
-      <KFilter style="width: 200px" placeholder="Код направления" />
-      <KFilter style="width: 120px" placeholder="Год" />
-      <KFilterResetIcon />
+    <div class="dep-lead-home__inner">
+      <div class="dep-lead-home__inner__page">
+        <KPageSwitcher :count-pages="count" v-model:current-page="currentPage" />
+      </div>
+      <div class="dep-lead-home__inner__filter">
+        <KFilter style="width: 200px" placeholder="Код направления" v-model="codeFilter" :content="codeDD" />
+        <KFilter style="width: 120px" placeholder="Год" />
+        <KFilterResetIcon />
+      </div>
     </div>
     <div class="dep-lead-home__content">
       <DepLeadHomeCard
+        style="cursor: pointer"
         @click="router.push(`programs/${v[6]}`)"
         v-for="(v, i) of data"
         :code="v[0]"
@@ -63,7 +95,8 @@ onMounted(() => {
         :form="v[4]"
         :graduate="v[3]"
         year="2023 год"
-        :filled="v[5]"
+        :id="v[6]"
+        :oopid="v[7]"
       />
     </div>
   </div>
@@ -75,25 +108,31 @@ onMounted(() => {
   flex-direction: column;
   gap: 20px;
 
-  &__filter {
-    width: fit-content;
-    align-self: flex-end;
-
+  &__inner {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    &__filter {
+      width: fit-content;
+      align-self: flex-end;
 
-    border-radius: 20px;
-    background: var(--white, white);
-    padding: 10px 20px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
 
-    > * {
-      flex-shrink: 0;
-    }
+      border-radius: 20px;
+      background: var(--white, white);
+      padding: 10px 20px;
 
-    > *:first-child {
-      flex-shrink: unset;
+      > * {
+        flex-shrink: 0;
+      }
+
+      > *:first-child {
+        flex-shrink: unset;
+      }
     }
   }
 

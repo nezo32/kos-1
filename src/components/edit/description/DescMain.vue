@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { KForms } from '@kosygin-rsu/components'
+import { KForms } from "@kosygin-rsu/components";
+import { ref } from "vue";
+
+const name = ref({
+  key: "Наименование института",
+  value: ""
+});
 </script>
 
 <template>
@@ -19,7 +25,7 @@ import { KForms } from '@kosygin-rsu/components'
       <KForms type="dropdown" :content="[]" header="Форма обучения" />
       <div class="desc-main__inner">
         <KForms type="date" :content="[]" header="ОПОП разработана в соответсвии с ФГОС от" />
-        <KForms type="input" :content="[]" header="№ приказа" />
+        <KForms type="input" :content="[]" header="№ приказа" v-model="name.value" />
       </div>
       <div class="desc-main__inner">
         <KForms type="date" :content="[]" header="Утверждена решением ученого совета от" />
@@ -27,11 +33,7 @@ import { KForms } from '@kosygin-rsu/components'
       </div>
     </section>
     <section>
-      <KForms
-        type="dropdown"
-        :content="[]"
-        header="ОПОП ВО рассмотрена и одобрена на заседании кафедры "
-      />
+      <KForms type="dropdown" :content="[]" header="ОПОП ВО рассмотрена и одобрена на заседании кафедры " />
       <div class="desc-main__inner">
         <KForms type="date" :content="[]" header="Одобрена на заседании кафедры от" />
         <KForms type="input" :content="[]" header="№ протокола" />

@@ -1,36 +1,32 @@
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL } from "node:url";
 
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-  ],
+  plugins: [vue()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      "@": fileURLToPath(new URL("./src", import.meta.url))
     }
   },
   server: {
     proxy: {
-      '/api': {
+      "/api": {
         target: "https://accreditation.rguk.local/",
         changeOrigin: true,
         secure: false,
 
-        rewrite: (p) => p.replace(/^\/api/, '')
+        rewrite: (p) => p.replace(/^\/api/, "")
       },
-      '/ws': {
-        target: "wss://accreditation.rguk.local/websocket",
+      "/websocket": {
+        target: "wss://accreditation.rguk.local",
         ws: true,
         changeOrigin: true,
-        secure: true,
-
-        rewrite: (p) => p.replace(/^\/ws/, '')
+        secure: false
       }
     },
-    cors: false,
+    cors: false
   }
-})
+});

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { KFileDropDown, KPageSwitcher, KSearchFilter } from '@kosygin-rsu/components'
+import { KFileDropDown, KPageSwitcher, KSearchFilter } from "@kosygin-rsu/components";
 
 const props = defineProps<{
-  status?: string
-  pdf?: string
-}>()
+  status?: string;
+  pdf?: string;
+}>();
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const props = defineProps<{
       <iframe width="100%" height="1120px" :src="pdf" frameborder="0" v-if="pdf" />
       <h2 v-else class="table-card__header">Файл не найден</h2>
     </div>
-    <KPageSwitcher :count-pages="54" v-if="pdf" />
+    <!-- <KPageSwitcher :count-pages="54" v-if="pdf" /> -->
   </div>
 </template>
 

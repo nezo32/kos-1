@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { uploadFile } from "@/core";
+import { uploadRpdFile } from "@/core";
 import { KKIDButton } from "@kosygin-rsu/components";
 import { ref } from "vue";
 
 const props = defineProps<{
-  planId: string;
-  oopFileTypeId: string;
+  disciplineFileType: string;
+  disciplineId: string;
 }>();
 
 const document = ref<File | null>(null);
@@ -37,7 +37,7 @@ function addDocument() {
 
 async function sendDocument() {
   if (!document.value) return;
-  await uploadFile(props.planId, document.value, props.oopFileTypeId);
+  await uploadRpdFile(props.disciplineId, document.value, props.disciplineFileType);
 }
 </script>
 

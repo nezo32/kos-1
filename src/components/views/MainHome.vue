@@ -1,127 +1,114 @@
 <script setup lang="ts">
-import { getMainView } from "@/core";
-import { KFilter, KFilterResetIcon, KTable, KArrowFormIcon } from "@kosygin-rsu/components";
-import { onMounted, ref, watch, shallowReactive, type Ref } from "vue";
+import { pagination, columnMapper } from "@/core/main";
+import { KArrowFormIcon, KNewTable, KTableTypes } from "@kosygin-rsu/components";
+import { ref, type Ref } from "vue";
 import { useRouter } from "vue-router";
-import { stringFirstToUpper } from "@/utils";
+import { exportAsCSV } from "@/utils";
+import Filter from "@/components/Filter.vue";
+import type { Plans } from "@/types/directus";
 
 type DataType = Array<{
   title: string;
   subtitle: string;
-  data: Ref<string[][]>;
-  headers: string[];
+  headers: KTableTypes.TableHeadType<Record<string | number | symbol, string | undefined | null>>[];
   opened: boolean;
 }>;
 
-const currentPage = ref(1);
-
 const router = useRouter();
 
-const data = shallowReactive<DataType>([
+const page = ref(1);
+const data = ref<DataType>([
   {
     opened: true,
     title: "Основные образовательные программы",
     subtitle: "2023 год",
-    data: ref([]),
-    headers: []
+    headers: [
+      /* {
+        "oop.code": {
+          title: "Код",
+          width: "90px"
+        },
+        "oop.name": { title: "Направление подготовки", width: "255px" },
+        "active_oop.name": { title: "Профиль", width: "255px" },
+        qualification: { title: "Квалификация", width: "150px" },
+        "edu_form.name": { title: "Форма", width: "140px" }
+      } */
+      {
+        "oop.code": {
+          title: "Код",
+          width: "90px"
+        },
+        "oop.name": { title: "Направление подготовки", width: "255px" },
+        "active_oop.name": { title: "Профиль", width: "255px" },
+        qualification: { title: "Квалификация", width: "150px" },
+        "edu_form.name": { title: "Форма", width: "140px" },
+        faculty: { title: "Заполнено", width: "140px", hideOrder: true }
+      }
+    ]
   }
 ]);
 
-data.forEach(
-  (v, i) => (data[i].headers = ["Код", "Направление подготовки", "Профиль", "Квалификация", "Форма", "Заполнено"])
-);
-
-function tableRouting(v: string[]) {
-  if (!apiData.value) return;
-  const found = apiData.value.find((el) => {
-    if (!(el.active_oop?.name && el.oop?.code && el.title && el.qualification && el.edu_form?.name)) return false;
-
-    const code = el.oop.code;
-    const title = el.title.slice(el.title.indexOf(" ") + 1);
-    const name = el.active_oop.name;
-    const edu_form = el.edu_form.name.includes(" форма")
-      ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(" форма"))
-      : el.edu_form.name;
-    const qualification = stringFirstToUpper(el.qualification);
-
-    return code == v[0] && title == v[1] && name == v[2] && qualification == v[3] && edu_form == v[4] && v[5] == "100%"
-      ? true
-      : false;
-  });
-  if (!found) return;
-  router.push(`/programs/${found.id}`);
+function routing(ev: MouseEvent, data: any) {
+  router.push("programs/" + data.id);
 }
 
-const count = ref(0);
-const apiData = ref<Awaited<ReturnType<typeof getMainView>>["data"]>();
+function dropdownClickHandler(v: (Plans | undefined)[]) {
+  const rawHeadValues = Object.values(data.value[0].headers[0]);
+  const rawHeadKeys = Object.keys(data.value[0].headers[0]);
 
-const sortTable = ref<{ index: number; direction: "descending" | "ascending" } | undefined>();
+  const head: string[] = [];
+  const content: string[][] = [];
 
-watch(sortTable, async (n) => {
-  await displayData(n);
-});
-
-async function displayData(sort?: typeof sortTable.value) {
-  // data[0].data.splice(0, data[0].data.length);
-
-  const req = await getMainView(currentPage.value, sort);
-
-  apiData.value = req.data;
-  count.value = req.count;
-
-  const newArr: string[][] = [];
-
-  apiData.value?.forEach((el) => {
-    newArr.push([
-      el.oop?.code || "ㅤ",
-      el.title ? el.title.slice(el.title.indexOf(" ") + 1) : "",
-      el.active_oop?.name || "ㅤ",
-      stringFirstToUpper(el.qualification || "ㅤ"),
-      el.edu_form?.name
-        ? el.edu_form.name.includes(" форма")
-          ? el.edu_form.name.slice(0, el.edu_form.name.indexOf(" форма"))
-          : el.edu_form.name
-        : "",
-      "100%"
-    ]);
+  rawHeadValues.forEach((el, i) => {
+    if (i == rawHeadValues.length - 1) return;
+    if (typeof el == "string") return;
+    head.push(el.title);
   });
-  data[0].data.value = newArr;
+
+  v.forEach((el) => {
+    const data: string[] = [];
+
+    rawHeadKeys.forEach((value) => {
+      if (value == "faculty") return;
+      //@ts-ignore
+      data.push(el[value]);
+    });
+
+    content.push(data);
+  });
+  exportAsCSV(head, content);
 }
-
-const institution = ref("");
-const department = ref("");
-const code = ref("");
-const form = ref("");
-
-watch(currentPage, async () => {
-  await displayData(sortTable.value);
-});
-onMounted(async () => {
-  await displayData();
-});
 </script>
 
 <template>
   <div class="home">
-    <div class="home__filter">
-      <KFilter placeholder="Институт" />
-      <KFilter placeholder="Код направления" style="width: 200px" />
-      <KFilter placeholder="Форма" style="width: 120px" />
-      <KFilterResetIcon />
-    </div>
+    <!-- <div class="home__filter">
+      <KFilter placeholder="Институт" v-model="institution" :content="iDropDown" :trigger="filterTrigger" />
+      <Filter placeholder="Код направления" v-model="code" style="width: 200px" />
+      <KFilter placeholder="Форма" v-model="form" style="width: 180px" :content="fDropDown" :trigger="filterTrigger" />
+      <KFilterResetIcon @click="filterTrigger = !filterTrigger" />
+    </div> -->
     <div class="home__content">
       <template v-for="(v, i) of data" :key="i">
-        <KTable
-          v-model:col-sort="sortTable"
-          v-model:current-page="currentPage"
-          :routing-handler="tableRouting"
+        <KNewTable
+          @dropdownClick="dropdownClickHandler"
+          @row-click="routing"
+          v-model:page="page"
+          style="width: 1040px !important; box-sizing: border-box"
           v-if="v.opened"
+          :head="v.headers[i]"
           :title="v.title"
           :subtitle="v.subtitle"
-          :pages="Math.ceil(count / 15)"
-          :headers="v.headers"
-          :content="(v.data as any)"
-        />
+          :pagination="pagination"
+          :column-mapper="columnMapper"
+        >
+          <template #faculty="{ content }">
+            <span :class="{ green: content == '100.0%', red: content == '0.0%' }" v-if="content && content != ''">{{
+              content
+            }}</span>
+            <span v-else style="height: 16px"></span>
+          </template>
+        </KNewTable>
         <div class="home__content__close" v-else @click="data[i].opened = true">
           <div class="home__content__close__left">
             <p class="table__text">{{ v.subtitle }}</p>
@@ -135,32 +122,19 @@ onMounted(async () => {
 </template>
 
 <style lang="scss">
+.green {
+  color: var(--resolved);
+}
+.red {
+  color: var(--rejected);
+}
 .home {
-  .table__body {
-    &__column {
-      max-width: 230px !important;
-    }
-    > *:nth-child(1) {
-      max-width: 90px !important;
-    }
-    > *:nth-child(2) {
-      min-width: 230px;
-    }
-    > *:nth-child(3) {
-      min-width: 230px;
-    }
-    > *:nth-child(4) {
-      min-width: 230px;
-    }
-    > *:nth-child(5) {
-      width: 136px;
-      flex-grow: unset;
-    }
-    > *:nth-child(6) {
-      max-width: unset !important;
-      flex-grow: unset;
-      width: 120px;
-    }
+  .skeleton {
+    height: 16px;
+  }
+
+  .table__row {
+    cursor: pointer;
   }
 
   display: flex;
