@@ -1,7 +1,7 @@
 import type { Plans } from "@/types/directus";
 import { readItems, aggregate } from "@directus/sdk";
 import type { KTableTypes } from "@kosygin-rsu/components";
-import { db, DisciplinesFilesTypesCount, OopFilesTypesCount } from ".";
+import { db, getDisciplinesFilesTypesCount, getOopFilesTypesCount } from ".";
 
 //@ts-ignore
 export const pagination: KTableTypes.TablePaginationFunc<Plans, Record<string, string>> = async (
@@ -155,8 +155,8 @@ export const columnMapper: KTableTypes.TableColumnMapper<Plans> | undefined = (e
     const oopFilesCount = oopFiles?.length || 0;
     const disciplinesFilesCount = disciplinesFiles.length;
 
-    const expectedDisciplinesFilesCount = disciplinesCount * Number(DisciplinesFilesTypesCount);
-    const expectedOopFilesCount = OopFilesTypesCount;
+    const expectedDisciplinesFilesCount = disciplinesCount * Number(await getDisciplinesFilesTypesCount());
+    const expectedOopFilesCount = await getOopFilesTypesCount();
 
     const result =
       ((oopFilesCount + disciplinesFilesCount) * 100) /
@@ -267,8 +267,8 @@ export const getFilledPercents = async (id: string, oopId: string) => {
   const oopFilesCount = oopFiles?.length || 0;
   const disciplinesFilesCount = disciplinesFiles.length;
 
-  const expectedDisciplinesFilesCount = disciplinesCount * Number(DisciplinesFilesTypesCount);
-  const expectedOopFilesCount = OopFilesTypesCount;
+  const expectedDisciplinesFilesCount = disciplinesCount * Number(await getDisciplinesFilesTypesCount());
+  const expectedOopFilesCount = await getOopFilesTypesCount();
 
   const result =
     ((oopFilesCount + disciplinesFilesCount) * 100) /

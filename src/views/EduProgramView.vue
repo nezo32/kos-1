@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { usePermissionStore } from '@/stores'
-import OperatorEduProgram from '@/components/views/OperatorEduProgram.vue'
-import DepLeadEduProgram from '@/components/views/DepLeadEduProgram.vue'
+import { useUserStore } from "@/stores";
+import OperatorEduProgram from "@/components/views/OperatorEduProgram.vue";
+import DepLeadEduProgram from "@/components/views/DepLeadEduProgram.vue";
 
-const store = usePermissionStore()
+const store = useUserStore();
 </script>
 
 <template>

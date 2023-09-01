@@ -10,16 +10,19 @@ import O4 from "./description/O4.vue";
 import O7First from "./description/O7First.vue";
 import O7Second from "./description/O7Second.vue";
 import Resurses from "./description/Resurses.vue";
-import { readItems, createItem, updateItem } from "@directus/sdk";
+import { readItems, createItem, updateItem, readItem } from "@directus/sdk";
 import { useRoute } from "vue-router";
 import { cancelable, type CancelablePromise } from "cancelable-promise";
 import { type DocumentsParts } from "@/types/directus";
+import { createClient } from "graphql-ws";
+import { useUserStore } from "@/stores";
 
 type Field = { key: string; value: string };
 
 const page = ref(1);
 
 const route = useRoute();
+const store = useUserStore();
 
 const headers = reactive([
   "Основная профессиональная образовательная программа Высшего образования",
@@ -33,6 +36,8 @@ const headers = reactive([
 ]);
 
 const currentFile = ref<string>();
+
+const displayData = ref<DocumentsParts[]>();
 
 async function load() {
   const id = route.params.id as string;
@@ -87,14 +92,13 @@ async function load() {
   }
 
   if (!exist) {
-    const res = await db.request(
+    await db.request(
       createItem("oop_files", {
         oop: oop[0].oop,
         //@ts-ignore
         type: docId
       })
     );
-    console.log(res);
   }
 
   currentFile.value = (
@@ -103,68 +107,28 @@ async function load() {
         fields: ["id"],
         filter: {
           //@ts-ignore
-          type: docId
+          type: docId,
+          oop: oop[0].oop
         }
       })
     )
   )[0].id;
 }
-
-const removeHandlers = ref<(() => void)[]>([]);
-const unsubscribe = ref<(() => void)[]>([]);
-
-async function wsConnect() {
-  await db.connect();
-  await db.subscribe("documents_parts", {
-    query: {
+async function getInitValues() {
+  const data = await db.request(
+    readItems("documents_parts", {
       filter: {
         //@ts-ignore
         oop_file: currentFile.value
       }
-    }
-  });
-}
-function wsDisconnect() {
-  unsubscribe.value.forEach((el) => el());
-  unsubscribe.value = [];
-  removeHandlers.value.forEach((el) => el());
-  removeHandlers.value = [];
-  db.disconnect();
-}
-function wsHandlers() {
-  removeHandlers.value = [];
-
-  removeHandlers.value.push(db.onWebSocket("open", openHandler));
-  removeHandlers.value.push(db.onWebSocket("message", messageHandler));
-  removeHandlers.value.push(db.onWebSocket("error", errorHandler));
-  removeHandlers.value.push(db.onWebSocket("close", closeHandler));
-}
-
-type MessageEventType = {
-  data: Record<string, any>[];
-  type: string;
-  event: string;
-};
-
-function openHandler(ev: Event) {
-  console.log("open", ev);
-}
-function messageHandler(ev: MessageEventType) {
-  console.log("message", ev);
-  if (ev.event == "update" || ev.event == "create") {
-    //@ts-ignore
-    displayData.value = ev.data;
-  }
-}
-function errorHandler(ev: Event) {
-  console.log("error", ev);
-}
-function closeHandler(ev: Event) {
-  console.log("close", ev);
+    })
+  );
+  //@ts-ignore
+  displayData.value = data;
 }
 
 const promise = ref<CancelablePromise<any>>();
-async function setField(data: Field, init: boolean) {
+async function setField(data: Field, init: boolean, changeFullValue?: boolean) {
   if (init) return;
   if (promise.value) {
     promise.value.cancel();
@@ -190,16 +154,17 @@ async function setField(data: Field, init: boolean) {
   const res = await promise.value;
 
   if (!res.length) {
-    /* db.sendMessage({
-      type: "subscription",
-      collection: "documents_parts",
-      action: "create",
-      data: {
-        oop_file: currentFile.value,
-        key: data.key,
-        value: { value: data.value }
-      }
-    }); */
+    if (changeFullValue) {
+      await db.request(
+        createItem("documents_parts", {
+          //@ts-ignore
+          oop_file: currentFile.value,
+          key: data.key,
+          value: data.value
+        })
+      );
+      return;
+    }
     await db.request(
       createItem("documents_parts", {
         //@ts-ignore
@@ -209,17 +174,14 @@ async function setField(data: Field, init: boolean) {
       })
     );
   } else {
-    /* db.sendMessage({
-      type: "subscription",
-      collection: "documents_parts",
-      action: "update",
-      data: {
-        id: res[0].id,
-        oop_file: currentFile.value,
-        key: data.key,
-        value: { value: data.value }
-      }
-    }); */
+    if (changeFullValue) {
+      await db.request(
+        updateItem("documents_parts", res[0].id, {
+          value: data.value
+        })
+      );
+      return;
+    }
     await db.request(
       updateItem("documents_parts", res[0].id, {
         value: { value: data.value }
@@ -228,46 +190,208 @@ async function setField(data: Field, init: boolean) {
   }
 }
 
-const displayData = ref<DocumentsParts[]>();
+const client = createClient({
+  url: "wss://accreditation.rguk.local/graphql",
+  connectionParams: async () => {
+    return { access_token: await db.getToken() };
+  }
+});
 
-async function getInitValues() {
-  const data = await db.request(
-    readItems("documents_parts", {
+/* const removeHandlers = ref<(() => void)[]>([]);
+const unsub = ref<() => void>(); */
+
+/* async function wsConnect() {
+  const { subscription, unsubscribe } = await db.subscribe("documents_parts", {
+    query: {
       filter: {
         //@ts-ignore
         oop_file: currentFile.value
       }
+    }
+  });
+  for await (const item of subscription) {
+    //@ts-ignore
+    const ev = item as MessageEventType;
+    console.log("generator", ev);
+    if (ev.event == "update" || ev.event == "create") {
+      //@ts-ignore
+      displayData.value = ev.data;
+    }
+  }
+  unsub.value = unsubscribe;
+}
+function wsDisconnect() {
+  unsub.value?.();
+
+  removeHandlers.value.forEach((el) => el());
+  removeHandlers.value = [];
+}
+function wsHandlers() {
+  removeHandlers.value = [];
+
+  removeHandlers.value.push(db.onWebSocket("open", openHandler));
+  removeHandlers.value.push(db.onWebSocket("message", messageHandler));
+  removeHandlers.value.push(db.onWebSocket("error", errorHandler));
+  removeHandlers.value.push(db.onWebSocket("close", closeHandler));
+} */
+
+/* type MessageEventType = {
+  data: Record<string, any>[];
+  type: string;
+  event: string;
+};
+
+function openHandler(ev: Event) {
+  console.log("open", ev);
+}
+
+function messageHandler(ev: MessageEventType) {
+  console.log("message", ev);
+}
+function errorHandler(ev: Event) {
+  console.log("error", ev);
+}
+function closeHandler(ev: Event) {
+  console.log("close", ev);
+} */
+
+function subscribeGraphQL() {
+  client.on("opened", () => {
+    console.log("ws opened");
+  });
+  client.on("connected", () => {
+    console.log("ws connected");
+  });
+  client.on("connecting", () => {
+    console.log("ws connecting");
+  });
+  client.on("closed", (s) => {
+    console.log("ws closed");
+  });
+
+  client.subscribe<{ documents_parts_mutated: Record<string, any> }>(
+    {
+      query: `
+				subscription {
+					documents_parts_mutated {
+						key
+						event
+						data {
+							key
+              value
+              oop_file {
+                id
+              }
+						}
+					}
+				}`
+    },
+    {
+      next: ({ data }) => {
+        if (!data || !("documents_parts_mutated" in data)) return;
+        const docParts = data.documents_parts_mutated;
+        if (docParts.event == "update" || docParts.event == "create") {
+          const docPartsData = Object.assign({}, docParts.data);
+          console.log(docPartsData);
+          if (docPartsData.oop_file && "id" in docPartsData.oop_file && docPartsData.oop_file.id == currentFile.value) {
+            delete docPartsData.oop_file;
+            displayData.value = docPartsData;
+          }
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        client.dispose();
+      },
+      complete: () => {}
+    }
+  );
+}
+
+const pingId = ref<number>();
+
+async function pingOrBlock() {
+  if (!currentFile.value) return;
+
+  const now = new Date();
+  const id = store.meId;
+
+  if (!id) return;
+
+  const fileInfo = await db.request(
+    readItem("oop_files", currentFile.value, {
+      //@ts-ignore
+      fields: ["date_updated", "user_updated.id", "user_updated.last_name", "user_updated.first_name"]
     })
   );
-  //@ts-ignore
-  displayData.value = data;
+
+  if ((fileInfo.user_updated?.id as string | undefined) != id) {
+    if (fileInfo.date_updated) {
+      if (Math.abs(new Date(fileInfo.date_updated).getTime() - now.getTime()) < 5000) {
+        booked.value = true;
+        worker.value = fileInfo.user_updated?.last_name + " " + fileInfo.user_updated?.first_name;
+      } else {
+        booked.value = false;
+        worker.value = undefined;
+        await db.request(updateItem("oop_files", currentFile.value!, {}));
+      }
+    } else {
+      worker.value = undefined;
+      booked.value = false;
+      await db.request(updateItem("oop_files", currentFile.value!, {}));
+    }
+  } else {
+    worker.value = undefined;
+    booked.value = false;
+    await db.request(updateItem("oop_files", currentFile.value!, {}));
+  }
+}
+
+async function pingIntervalWrapper() {
+  await pingOrBlock();
+  return setInterval(async () => {
+    await pingOrBlock();
+  }, 1000);
 }
 
 onMounted(async () => {
-  wsHandlers();
-
+  await load();
   await getInitValues();
 
-  await load();
-  await wsConnect();
+  if (!currentFile.value) return;
+
+  subscribeGraphQL();
+
+  pingId.value = await pingIntervalWrapper();
 });
 
-onUnmounted(() => {
-  wsDisconnect();
+onUnmounted(async () => {
+  client.dispose();
+  clearInterval(pingId.value);
 });
+
+const booked = ref(false);
+const worker = ref<string>();
 </script>
 
 <template>
   <div class="description-oop">
-    <DocumentEditBase v-model:currentPage="page" title="ОПОП" :header="headers[page - 1]" :pages="8" dropdown>
-      <DescMain v-if="page == 1" @changeField="setField" :data="displayData" />
-      <O1 v-if="page == 2" @changeField="setField" />
-      <O2 v-if="page == 3" @changeField="setField" />
-      <O3 v-if="page == 4" @changeField="setField" />
-      <O4 v-if="page == 5" @changeField="setField" />
-      <O7First v-if="page == 6" @changeField="setField" />
-      <O7Second v-if="page == 7" @changeField="setField" />
-      <Resurses v-if="page == 8" @changeField="setField" />
+    <DocumentEditBase
+      v-model:currentPage="page"
+      title="ОПОП"
+      :header="headers[page - 1]"
+      :pages="8"
+      :booked="booked"
+      :worker="worker"
+    >
+      <DescMain v-if="page == 1" @changeField="setField" :data="displayData" :booked="booked" />
+      <O1 v-if="page == 2" @changeField="setField" :booked="booked" />
+      <O2 v-if="page == 3" @changeField="setField" :booked="booked" />
+      <O3 v-if="page == 4" @changeField="setField" :booked="booked" />
+      <O4 v-if="page == 5" @changeField="setField" :booked="booked" />
+      <O7First v-if="page == 6" @changeField="setField" :booked="booked" />
+      <O7Second v-if="page == 7" @changeField="setField" :booked="booked" />
+      <Resurses v-if="page == 8" @changeField="setField" :booked="booked" />
     </DocumentEditBase>
   </div>
 </template>

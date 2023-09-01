@@ -1,28 +1,33 @@
 <script setup lang="ts">
 import type { DocumentsParts } from "@/types/directus";
 import { KForms } from "@kosygin-rsu/components";
-import { ref, watch, nextTick, type Ref, onMounted, onBeforeUpdate } from "vue";
+import { ref, watch, type Ref, onMounted, onBeforeUpdate, reactive, onUpdated, nextTick } from "vue";
 import debounce from "lodash.debounce";
+import { v4 as uuidv4 } from "uuid";
 
-const prop = defineProps<{ data: DocumentsParts[] | undefined }>();
+const prop = defineProps<{ data: DocumentsParts[] | DocumentsParts | undefined; booked?: boolean }>();
 
 type Field = { key: string; value: string };
 
 const emit = defineEmits<{
-  (event: "changeField", data: Field, init: boolean): void;
+  (event: "changeField", data: Field, init: boolean, changeFullValue?: boolean): void;
 }>();
 
 const init = ref(true);
+
+function getNewInner() {
+  return { org: "", reviewer: "", date: "", key: uuidv4() };
+}
 
 function createRef(key: string) {
   return ref({ key, value: "" });
 }
 
-function update(n: Field, init: boolean) {
-  emit("changeField", n, init);
+function update(n: Field, init: boolean, changeFullValue?: boolean) {
+  emit("changeField", n, init, changeFullValue);
 }
 
-const debouncedUpdate = debounce(update, 150);
+const debouncedUpdate = debounce(update, 1000);
 
 function setEvent(arr: Ref<Field>[]) {
   arr.forEach((el) => {
@@ -39,50 +44,95 @@ function setEvent(arr: Ref<Field>[]) {
 watch(
   () => prop.data,
   (n) => {
-    n?.forEach((el) => {
-      [a, b, c, d, e, f, g, h, i, j, k, l, aa, ab, ac, ad, ae, ba, bb, bc, ca, cb, cc, da, db].forEach((elem) => {
-        if (elem.value.key == el.key) {
+    console.log("update props");
+    if (!n) return;
+    if (n instanceof Array) {
+      n?.forEach((el) => {
+        [a, b, c, d, e, f, g, h, i, j, k, l, aa, ab, ac, ad, ae, da, db].forEach((elem) => {
+          if (elem.value.key == el.key) {
+            init.value = true;
+            //@ts-ignore
+            elem.value.value = el.value.value as string;
+          }
+        });
+        if (el.key == eduProgram.key) {
           init.value = true;
-          //@ts-ignore
-          elem.value.value = el.value.value as string;
+          eduProgram.value = el.value as any;
+          eduProgram.value.forEach((_, i) => {
+            eduProgram.value[i].key = uuidv4();
+          });
         }
       });
-    });
+    } else {
+      [a, b, c, d, e, f, g, h, i, j, k, l, aa, ab, ac, ad, ae, da, db].forEach((elem) => {
+        if (elem.value.key == n.key) {
+          init.value = true;
+          //@ts-ignore
+          elem.value.value = n.value.value as string;
+        }
+      });
+      if (n.key == eduProgram.key) {
+        init.value = true;
+        eduProgram.value = n.value as any;
+        eduProgram.value.forEach((_, i) => {
+          eduProgram.value[i].key = uuidv4();
+        });
+      }
+    }
   },
   { deep: true }
 );
 
-const a = createRef("Наименование института");
-const b = createRef("Утверждено");
-const c = createRef("Дата утверждения");
-const d = createRef("Уровень образования");
-const e = createRef("Код направления подготовки");
-const f = createRef("Наименование направления подготовки");
-const g = createRef("Профиль");
-const h = createRef("Форма обучения");
-const i = createRef("ОПОП разработана в соответсвии с ФГОС от");
-const j = createRef("ОПОП разработана в соответсвии с ФГОС от № приказа");
-const k = createRef("Утверждена решением ученого совета от");
-const l = createRef("Утверждена решением ученого совета от № приказа");
-const aa = createRef("ОПОП ВО рассмотрена и одобрена на заседании кафедры");
-const ab = createRef("Одобрена на заседании кафедры от");
-const ac = createRef("Одобрена на заседании кафедры от № протокола");
-const ad = createRef("Руководитель образовательный программы");
-const ae = createRef("Заведующий кафедрой");
-const ba = createRef("1 Образовательная программа одобрена и согласована организациями/предприятиями");
-const bb = createRef("1 Рецензент");
-const bc = createRef("1 № протокола согласования от");
-const ca = createRef("2 Образовательная программа одобрена и согласована организациями/предприятиями");
-const cb = createRef("2 Рецензент");
-const cc = createRef("2 № протокола согласования от");
-const da = createRef("Согласованно начальником Управления образовательных программ и проектов");
-const db = createRef("Согласованно директором института");
+const a = createRef("institution_name");
+const b = createRef("approved_by");
+const c = createRef("date_of_approval");
+const d = createRef("level_of_edu");
+const e = createRef("code_of_train_dir");
+const f = createRef("field_of_study");
+const g = createRef("profile");
+const h = createRef("form_of_edu");
+const i = createRef("fgos_date");
+const j = createRef("fgos_order");
+const k = createRef("approved_academ_council_date");
+const l = createRef("approved_academ_council_order");
+const aa = createRef("reviewed_approved_department_meet_by");
+const ab = createRef("department_meet_date");
+const ac = createRef("department_meet_order");
+const ad = createRef("head_edu_program");
+const ae = createRef("head_department");
+const da = createRef("approved_by_head_department_edu_progs_projs");
+const db = createRef("agreed_by_institute_director");
 
-onMounted(async () => {
-  setEvent([a, b, c, d, e, f, g, h, i, j, k, l, aa, ab, ac, ad, ae, ba, bb, bc, ca, cb, cc, da, db]);
+const eduProgram = reactive<{ key: string; value: { org: string; reviewer: string; date: string; key?: string }[] }>({
+  key: "edu_program_org",
+  value: [
+    {
+      org: "",
+      reviewer: "",
+      date: "",
+      key: uuidv4()
+    }
+  ]
 });
 
-onBeforeUpdate(() => {
+watch(eduProgram, (n) => {
+  eduProgram.value.forEach((el, ind) => {
+    if (el.date == "" && el.org == "" && ind != eduProgram.value.length - 1 && el.reviewer == "") {
+      eduProgram.value.splice(ind, 1);
+    }
+  });
+  const tmp = Object.assign({}, n);
+  tmp.value.forEach((_, i) => {
+    delete tmp.value[i].key;
+  });
+  debouncedUpdate({ key: tmp.key, value: JSON.stringify(tmp.value) }, init.value, true);
+});
+
+onMounted(async () => {
+  setEvent([a, b, c, d, e, f, g, h, i, j, k, l, aa, ab, ac, ad, ae, da, db]);
+});
+
+onUpdated(() => {
   init.value = false;
 });
 </script>
@@ -90,75 +140,142 @@ onBeforeUpdate(() => {
 <template>
   <div class="desc-main">
     <section>
-      <KForms type="dropdown" v-model="a.value" :content="['bebar']" header="Наименование института" />
+      <KForms
+        type="dropdown"
+        :disabled="booked"
+        v-model="a.value"
+        :content="['bebar']"
+        header="Наименование института"
+      />
       <div class="desc-main__inner">
-        <KForms type="input" v-model="b.value" :content="[]" header="Утверждено" />
-        <KForms type="date" v-model="c.value" :content="[]" header="Дата утверждения" />
+        <KForms type="input" :disabled="booked" v-model="b.value" :content="[]" header="Утверждено" />
+        <KForms type="date" :disabled="booked" v-model="c.value" :content="[]" header="Дата утверждения" />
       </div>
       <div class="desc-main__inner">
-        <KForms type="dropdown" v-model="d.value" :content="[]" header="Уровень образования" />
-        <KForms type="dropdown" v-model="e.value" :content="[]" header="Код направления подготовки" />
+        <KForms type="dropdown" :disabled="booked" v-model="d.value" :content="[]" header="Уровень образования" />
+        <KForms
+          type="dropdown"
+          :disabled="booked"
+          v-model="e.value"
+          :content="[]"
+          header="Код направления подготовки"
+        />
       </div>
-      <KForms type="dropdown" v-model="f.value" :content="[]" header="Наименование направления подготовки" />
-      <KForms type="dropdown" v-model="g.value" :content="[]" header="Профиль" />
-      <KForms type="dropdown" v-model="h.value" :content="[]" header="Форма обучения" />
+      <KForms
+        type="dropdown"
+        :disabled="booked"
+        v-model="f.value"
+        :content="[]"
+        header="Наименование направления подготовки"
+      />
+      <KForms type="dropdown" :disabled="booked" v-model="g.value" :content="[]" header="Профиль" />
+      <KForms type="dropdown" :disabled="booked" v-model="h.value" :content="[]" header="Форма обучения" />
       <div class="desc-main__inner">
-        <KForms type="date" v-model="i.value" :content="[]" header="ОПОП разработана в соответсвии с ФГОС от" />
-        <KForms type="input" v-model="j.value" :content="[]" header="№ приказа" />
+        <KForms
+          type="date"
+          :disabled="booked"
+          v-model="i.value"
+          :content="[]"
+          header="ОПОП разработана в соответсвии с ФГОС от"
+        />
+        <KForms type="input" :disabled="booked" v-model="j.value" :content="[]" header="№ приказа" />
       </div>
       <div class="desc-main__inner">
-        <KForms type="date" v-model="k.value" :content="[]" header="Утверждена решением ученого совета от" />
-        <KForms type="input" v-model="l.value" :content="[]" header="№ приказа" />
+        <KForms
+          type="date"
+          :disabled="booked"
+          v-model="k.value"
+          :content="[]"
+          header="Утверждена решением ученого совета от"
+        />
+        <KForms type="input" :disabled="booked" v-model="l.value" :content="[]" header="№ приказа" />
       </div>
     </section>
     <section>
       <KForms
+        :disabled="booked"
         type="dropdown"
         v-model="aa.value"
         :content="[]"
         header="ОПОП ВО рассмотрена и одобрена на заседании кафедры"
       />
       <div class="desc-main__inner">
-        <KForms type="date" v-model="ab.value" :content="[]" header="Одобрена на заседании кафедры от" />
-        <KForms type="input" v-model="ac.value" :content="[]" header="№ протокола" />
+        <KForms
+          :disabled="booked"
+          type="date"
+          v-model="ab.value"
+          :content="[]"
+          header="Одобрена на заседании кафедры от"
+        />
+        <KForms :disabled="booked" type="input" v-model="ac.value" :content="[]" header="№ протокола" />
       </div>
       <div class="desc-main__inner">
-        <KForms type="dropdown" v-model="ad.value" :content="[]" header="Руководитель образовательный программы" />
-        <KForms type="dropdown" v-model="ae.value" :content="[]" header="Заведующий кафедрой" />
+        <KForms
+          :disabled="booked"
+          type="dropdown"
+          v-model="ad.value"
+          :content="[]"
+          header="Руководитель образовательной программы"
+        />
+        <KForms :disabled="booked" type="dropdown" v-model="ae.value" :content="[]" header="Заведующий кафедрой" />
       </div>
     </section>
+
+    <!--  -->
+
     <section>
-      <KForms
-        v-model="ba.value"
-        type="input"
-        :content="[]"
-        header="Образовательная программа одобрена и согласована организациями/предприятиями"
-      />
-      <div class="desc-main__inner">
-        <KForms v-model="bb.value" type="dropdown" :content="[]" header="Рецензент" />
-        <KForms v-model="bc.value" type="date" :content="[]" header="№ протокола согласования от" />
-      </div>
+      <article v-for="(v, i) of eduProgram.value" :key="v.key">
+        <KForms
+          :disabled="booked"
+          v-model="v.org"
+          type="input"
+          :content="[]"
+          header="Образовательная программа одобрена и согласована организациями/предприятиями"
+        />
+        <div class="desc-main__inner">
+          <KForms
+            :disabled="booked"
+            v-model="v.reviewer"
+            type="dropdown"
+            :content="['test rewier']"
+            header="Рецензент"
+          />
+          <KForms :disabled="booked" v-model="v.date" type="date" :content="[]" header="№ протокола согласования от" />
+        </div>
+      </article>
+      <aside>
+        <p></p>
+        <span
+          @click="
+            eduProgram.value[eduProgram.value.length - 1].org &&
+            eduProgram.value[eduProgram.value.length - 1].date &&
+            eduProgram.value[eduProgram.value.length - 1].reviewer
+              ? eduProgram.value.push(getNewInner())
+              : true
+          "
+          ><span>+</span>Добавить</span
+        >
+        <p></p>
+      </aside>
     </section>
+
+    <!--  -->
+
     <section>
       <KForms
-        v-model="ca.value"
-        type="input"
-        :content="[]"
-        header="Образовательная программа одобрена и согласована организациями/предприятиями"
-      />
-      <div class="desc-main__inner">
-        <KForms v-model="cb.value" type="dropdown" :content="[]" header="Рецензент" />
-        <KForms v-model="cc.value" type="date" :content="[]" header="№ протокола согласования от" />
-      </div>
-    </section>
-    <section>
-      <KForms
+        :disabled="booked"
         v-model="da.value"
         type="dropdown"
         :content="[]"
         header="Согласованно начальником Управления образовательных программ и проектов"
       />
-      <KForms v-model="db.value" type="dropdown" :content="[]" header="Согласованно директором института" />
+      <KForms
+        :disabled="booked"
+        v-model="db.value"
+        type="dropdown"
+        :content="[]"
+        header="Согласованно директором института"
+      />
     </section>
   </div>
 </template>
@@ -173,6 +290,41 @@ onBeforeUpdate(() => {
     display: flex;
     flex-direction: column;
     gap: 30px;
+
+    > article {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    > aside {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 73px;
+      > p {
+        background: #016ae7;
+        height: 1px;
+        width: 100%;
+      }
+      > span {
+        cursor: pointer;
+        white-space: nowrap;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 33px;
+        color: var(--elements);
+        font-weight: 400;
+        font-size: 17px;
+        line-height: normal;
+        > span {
+          padding: 4px 11px;
+          font-size: 24px;
+        }
+      }
+    }
   }
 
   &__inner {

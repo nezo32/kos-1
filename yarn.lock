@@ -59,10 +59,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@directus/sdk@npm:11.0.2":
-  version: 11.0.2
-  resolution: "@directus/sdk@npm:11.0.2"
-  checksum: e93005220dacbd51d9c6ad9727ac1ad3b835ca75e4480c0719011a90251c6b0848576584dfae9c97dab98ec6c70e58de5f2424c73180dac3d0a097f3af40f56b
+"@directus/sdk@npm:11.0.3":
+  version: 11.0.3
+  resolution: "@directus/sdk@npm:11.0.3"
+  checksum: 5123df2ad7477e09b08148f27392a0dcc28f1cbfa8d6bb0d8aaa3492d0c5e59492e4a17667ad9e0830bd8502a8547b2feafbfd6ed32e972a20bd88f5a208e1b7
   languageName: node
   linkType: hard
 
@@ -308,9 +308,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kosygin-rsu/components@npm:^2.5.2":
-  version: 2.5.2
-  resolution: "@kosygin-rsu/components@npm:2.5.2::__archiveUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F41730752%2Fpackages%2Fnpm%2F%40kosygin-rsu%2Fcomponents%2F-%2F%40kosygin-rsu%2Fcomponents-2.5.2.tgz"
+"@kosygin-rsu/components@npm:^2.5.5":
+  version: 2.5.5
+  resolution: "@kosygin-rsu/components@npm:2.5.5::__archiveUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F41730752%2Fpackages%2Fnpm%2F%40kosygin-rsu%2Fcomponents%2F-%2F%40kosygin-rsu%2Fcomponents-2.5.5.tgz"
   dependencies:
     "@babel/types": ^7.22.5
     "@vuepic/vue-datepicker": 6.0.2
@@ -323,7 +323,7 @@ __metadata:
     cancelable-promise: ^4.3.1
     sass: 1.56.1
     vue: ^3.3.4
-  checksum: 5c7bc42bace77f181708b0210c581cb033e295dd7667915c2d898e5a3a2d1fc3997fb51fbf7cb4583e23be89fcdead183b06f969a7e6bf1f9a874f590bdac1b8
+  checksum: 6459ed995d158f779fae5bc6f0e8517ee2693a26c8836b4d474f9ca8bed63b9c902fa2d8baeb65432901f5bc24a026312b34acd5965242c5cd2db57e7f5186ec
   languageName: node
   linkType: hard
 
@@ -816,8 +816,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "accreditation-frontend@workspace:."
   dependencies:
-    "@directus/sdk": 11.0.2
-    "@kosygin-rsu/components": ^2.5.2
+    "@directus/sdk": 11.0.3
+    "@kosygin-rsu/components": ^2.5.5
     "@rushstack/eslint-patch": ^1.2.0
     "@tsconfig/node18": ^2.0.1
     "@types/lodash.debounce": ^4.0.7
@@ -831,9 +831,12 @@ __metadata:
     cancelable-promise: 4.3.1
     eslint: ^8.39.0
     eslint-plugin-vue: ^9.11.0
+    graphql: ^16.8.0
+    graphql-ws: ^5.14.0
     lodash.debounce: 4.0.8
     npm-run-all: ^4.1.5
     pinia: ^2.1.3
+    pinia-plugin-persistedstate: ^3.2.0
     prettier: ^2.8.8
     sass: 1.56.1
     typescript: ~5.0.4
@@ -2052,6 +2055,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"graphql-ws@npm:^5.14.0":
+  version: 5.14.0
+  resolution: "graphql-ws@npm:5.14.0"
+  peerDependencies:
+    graphql: ">=0.11 <=16"
+  checksum: 7b622944823fa12a77ea490656121a77e1a1daf08114a6a0b027922113f4481d95f4fe380a5de369a51657ef777d35757dc31f63e41071c21f3e97ca47e4205a
+  languageName: node
+  linkType: hard
+
+"graphql@npm:^16.8.0":
+  version: 16.8.0
+  resolution: "graphql@npm:16.8.0"
+  checksum: d853d4085b0c911a7e2a926c3b0d379934ec61cd4329e70cdf281763102f024fd80a97db7a505b8b04fed9050cb4875f8f518150ea854557a500a0b41dcd7f4e
+  languageName: node
+  linkType: hard
+
 "has-bigints@npm:^1.0.1, has-bigints@npm:^1.0.2":
   version: 1.0.2
   resolution: "has-bigints@npm:1.0.2"
@@ -3074,6 +3093,15 @@ __metadata:
   version: 3.0.0
   resolution: "pify@npm:3.0.0"
   checksum: 6cdcbc3567d5c412450c53261a3f10991665d660961e06605decf4544a61a97a54fefe70a68d5c37080ff9d6f4cf51444c90198d1ba9f9309a6c0d6e9f5c4fde
+  languageName: node
+  linkType: hard
+
+"pinia-plugin-persistedstate@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "pinia-plugin-persistedstate@npm:3.2.0"
+  peerDependencies:
+    pinia: ^2.0.0
+  checksum: c558b83cdd59e45956f328c34f0b067471dda122ed26555646107ebca5201d94c035ffaf3b400cae26020ad1be8978716f1f538653d6b90f23760c2f7ccbce82
   languageName: node
   linkType: hard
 

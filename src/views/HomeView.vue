@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import MainHome from '@/components/views/MainHome.vue'
-import DepLeadHome from '@/components/views/DepLeadHome.vue'
-import { usePermissionStore } from '@/stores'
+import MainHome from "@/components/views/MainHome.vue";
+import DepLeadHome from "@/components/views/DepLeadHome.vue";
+import { useUserStore } from "@/stores";
 
-const store = usePermissionStore()
+const store = useUserStore();
 </script>
 
 <template>

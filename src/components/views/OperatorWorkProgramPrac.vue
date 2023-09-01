@@ -5,7 +5,7 @@ import Document from "@/components/Document.vue";
 import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
 import EmployeeCard from "@/components/EmployeeCard.vue";
 import { readItems } from "@directus/sdk";
-import { getPlanById, DisciplinesFileTypes, db } from "@/core";
+import { getPlanById, getDisciplinesFileTypes, db } from "@/core";
 import { stringFirstToUpper } from "@/utils";
 import { useRoute } from "vue-router";
 
@@ -21,12 +21,14 @@ const currentFileTypeId = ref("");
 
 const url = ref<string>();
 
-function changeDocument(ind: number) {
+async function changeDocument(ind: number) {
   documentSelector.value = [false, false, false];
   documentSelector.value[ind] = true;
-  if (ind == 0) currentFileTypeId.value = DisciplinesFileTypes.find((el) => el.title == "Программа")?.id ?? "";
-  if (ind == 1) currentFileTypeId.value = DisciplinesFileTypes.find((el) => el.title == "Аннотация")?.id ?? "";
-  if (ind == 2) currentFileTypeId.value = DisciplinesFileTypes.find((el) => el.title == "ФОС")?.id ?? "";
+  if (ind == 0)
+    currentFileTypeId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "Программа")?.id ?? "";
+  if (ind == 1)
+    currentFileTypeId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "Аннотация")?.id ?? "";
+  if (ind == 2) currentFileTypeId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "ФОС")?.id ?? "";
 }
 
 async function getURL(id: string | undefined) {
@@ -57,7 +59,7 @@ watch(currentFileTypeId, async () => {
 });
 
 onMounted(async () => {
-  currentFileTypeId.value = DisciplinesFileTypes.find((el) => el.title == "Программа")?.id ?? "";
+  currentFileTypeId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "Программа")?.id ?? "";
   await reload();
 });
 </script>

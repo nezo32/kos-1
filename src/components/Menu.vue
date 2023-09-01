@@ -1,37 +1,41 @@
 <script setup lang="ts">
-import { usePermissionStore } from '@/stores'
-import { KVerticalMenu, KVerticalMenuButtons } from '@kosygin-rsu/components'
-import { reactive, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useUserStore } from "@/stores";
+import { KVerticalMenu, KVerticalMenuButtons } from "@kosygin-rsu/components";
+import { reactive, computed, watch } from "vue";
+import { useRoute } from "vue-router";
 
-const active = reactive([false, false, false])
+const active = reactive([false, false, false]);
 
-const route = useRoute()
-const store = usePermissionStore()
-const path = computed(() => route.fullPath)
+const route = useRoute();
+const store = useUserStore();
+const path = computed(() => route.fullPath);
 
 function set(index: number) {
   active.forEach((_, i) => {
-    if (i != index) active[i] = false
-    else active[i] = true
-  })
+    if (i != index) active[i] = false;
+    else active[i] = true;
+  });
 }
 
 watch(path, (n) => {
-  if (n.includes('programs')) {
-    set(0)
-    return
+  if (n.includes("programs")) {
+    set(0);
+    return;
   }
-  if (n.includes('op_supervisors')) {
-    set(1)
-    return
+  if (n.includes("op_supervisors")) {
+    set(1);
+    return;
   }
-  if (n.includes('exit')) {
-    set(2)
-    return
+  if (n.includes("exit")) {
+    set(2);
+    return;
   }
-  set(-1)
-})
+  if (n.includes("auth")) {
+    set(3);
+    return;
+  }
+  set(-1);
+});
 </script>
 
 <template>
@@ -45,6 +49,7 @@ watch(path, (n) => {
         content="Руководители ОП"
         icon="management"
       />
+      <KVerticalMenuButtons :active="active[3]" url="/auth" content="Вход" icon="exit" />
       <KVerticalMenuButtons :active="active[2]" url="/exit" content="Выход" icon="exit" />
     </KVerticalMenu>
   </div>

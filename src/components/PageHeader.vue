@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { computed, onUpdated, ref, watch } from "vue";
-import { useRoute, type RouteLocationMatched } from "vue-router";
-import { usePermissionStore } from "@/stores";
+import { useRoute, type RouteLocationMatched, useRouter } from "vue-router";
+import { useUserStore } from "@/stores";
 import { KServiceHeader } from "@kosygin-rsu/components";
+import { storeToRefs } from "pinia";
 
 const route = useRoute();
-const store = usePermissionStore();
+const router = useRouter();
+const store = useUserStore();
+
+const { authed, permission, username } = storeToRefs(store);
+
+watch(username, (n) => {
+  name.value = n ?? "Не авторизован";
+});
 
 const notificationPath = ref("https://example.com");
-const name = ref("Огородов Дмитрий");
+const name = ref(store.username ?? "Не авторизован");
 const pfpUrl = ref("/images/placeholder.png");
 const availablePermissions = ref([
   { name: "Оператор" },
@@ -34,6 +42,7 @@ watch(route, async () => {
 
 <template>
   <KServiceHeader
+    @link-click="(link) => router.push(link)"
     class="sh"
     v-model="store.permission"
     :path="breadcrumbs"

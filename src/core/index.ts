@@ -1,16 +1,34 @@
 import { createDirectus, type QuerySort, type QueryFilter } from "@directus/sdk";
-import { authentication, rest, readItems, readItem, realtime, aggregate, uploadFiles, createItem } from "@directus/sdk";
+import {
+  authentication,
+  rest,
+  readItems,
+  readItem,
+  realtime,
+  aggregate,
+  uploadFiles,
+  createItem,
+  graphql
+} from "@directus/sdk";
 
 import type { CustomDirectusTypes, Plans } from "@/types/directus";
 
-export const db = createDirectus<CustomDirectusTypes>("http://localhost:5173/api")
+export const db = createDirectus<CustomDirectusTypes>("https://accreditation.rguk.local")
   .with(authentication())
-  .with(realtime())
+  .with(
+    realtime({
+      authMode: "handshake",
+      reconnect: {
+        delay: 1000,
+        retries: 5
+      },
+      heartbeat: true
+    })
+  )
+  .with(graphql())
   .with(rest());
 
-await db.login("l.nik801.l@gmail.com", "admin", {});
-
-export const OopFilesTypesCount =
+export const getOopFilesTypesCount = async () =>
   (
     await db.request(
       aggregate("oop_files_types", {
@@ -18,7 +36,7 @@ export const OopFilesTypesCount =
       })
     )
   )[0].count ?? 0;
-export const DisciplinesFilesTypesCount =
+export const getDisciplinesFilesTypesCount = async () =>
   (
     await db.request(
       aggregate("disciplines_files_types", {
@@ -27,11 +45,12 @@ export const DisciplinesFilesTypesCount =
     )
   )[0].count ?? 0;
 
-export const DisciplinesFileTypes = await db.request(
-  readItems("disciplines_files_types", {
-    fields: ["title", "id"]
-  })
-);
+export const getDisciplinesFileTypes = async () =>
+  await db.request(
+    readItems("disciplines_files_types", {
+      fields: ["title", "id"]
+    })
+  );
 
 type SortTypes = QuerySort<CustomDirectusTypes, Plans>;
 type FilterTypes = QueryFilter<CustomDirectusTypes, Plans>;
@@ -424,6 +443,6 @@ export async function getURL(planId: string, documentTypeId: string) {
       }
     })
   );
-  if (a.length == 0) return undefined;
+  if (a.length == 0 || !a[0].file) return undefined;
   return `https://accreditation.rguk.local/assets/${a[0].file}?access_token=${await db.getToken()}`;
 }

@@ -6,7 +6,7 @@ import EditRPDDocument from "@/components/placeholder/EditRPDDocument.vue";
 
 import { KSwitchButton } from "@kosygin-rsu/components";
 import { ref, nextTick, watch, onMounted } from "vue";
-import { getPlanById, DisciplinesFileTypes } from "@/core";
+import { getPlanById, getDisciplinesFileTypes } from "@/core";
 import { stringFirstToUpper } from "@/utils";
 import { useRoute } from "vue-router";
 
@@ -20,16 +20,16 @@ const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
 const documentSelector = ref([true, false, false]);
 const currentFileId = ref("");
 
-function changeDocument(ind: number) {
+async function changeDocument(ind: number) {
   documentSelector.value = [false, false, false];
   documentSelector.value[ind] = true;
-  if (ind == 0) currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "Программа")?.id ?? "";
-  if (ind == 1) currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "Аннотация")?.id ?? "";
-  if (ind == 2) currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "ФОС")?.id ?? "";
+  if (ind == 0) currentFileId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "Программа")?.id ?? "";
+  if (ind == 1) currentFileId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "Аннотация")?.id ?? "";
+  if (ind == 2) currentFileId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "ФОС")?.id ?? "";
 }
 
-onMounted(() => {
-  currentFileId.value = DisciplinesFileTypes.find((el) => el.title == "Программа")?.id ?? "";
+onMounted(async () => {
+  currentFileId.value = (await getDisciplinesFileTypes()).find((el) => el.title == "Программа")?.id ?? "";
 });
 </script>
 

@@ -21,20 +21,7 @@ watch(currentPage, async () => {
 });
 
 const codeFilter = ref<string>();
-const codeDD = ref(
-  (
-    await db.request(
-      readItems("plans", {
-        //@ts-ignore
-        fields: ["oop.code"],
-        //@ts-ignore
-        sort: ["oop.code"]
-      })
-    )
-  )
-    ?.map((el) => el.oop?.code || "")
-    .filter((value, index, arr) => arr.indexOf(value) === index) ?? []
-);
+const codeDD = ref();
 
 watch(codeFilter, async (n) => {
   await displayData({ code: n });
@@ -68,6 +55,19 @@ async function displayData(filter?: FilterObject) {
 }
 
 onMounted(async () => {
+  codeDD.value =
+    (
+      await db.request(
+        readItems("plans", {
+          //@ts-ignore
+          fields: ["oop.code"],
+          //@ts-ignore
+          sort: ["oop.code"]
+        })
+      )
+    )
+      ?.map((el) => el.oop?.code || "")
+      .filter((value, index, arr) => arr.indexOf(value) === index) ?? [];
   await displayData();
 });
 </script>

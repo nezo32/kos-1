@@ -12,7 +12,7 @@ export default defineConfig({
     }
   },
   server: {
-    proxy: {
+    /* proxy: {
       "/api": {
         target: "https://accreditation.rguk.local/",
         changeOrigin: true,
@@ -26,7 +26,7 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       }
-    },
+    }, */
     cors: false
   }
 });

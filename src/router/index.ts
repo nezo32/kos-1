@@ -1,14 +1,14 @@
 import { getOOPDocumentTitle } from "@/core";
-import { usePermissionStore } from "@/stores";
+import { useUserStore } from "@/stores";
 import { createRouter, createWebHistory, type RouteLocationNormalized } from "vue-router";
 
 const checkDocumentEdit = () => {
-  const store = usePermissionStore();
+  const store = useUserStore();
   return store.permission == "Руководитель ООП" ? true : "/";
 };
 
 const checkRPDEdit = () => {
-  const store = usePermissionStore();
+  const store = useUserStore();
   return store.permission == "Заведующий кафедры" || store.permission == "Преподаватель" ? true : "/";
 };
 
@@ -30,6 +30,7 @@ const router = createRouter({
           component: () => import("@/views/HomeView.vue"),
           alias: "/"
         },
+
         {
           path: "programs/:id",
           name: "Образовательная программа",
@@ -246,7 +247,7 @@ const router = createRouter({
         breadcrumbs: "Руководители ОП"
       },
       beforeEnter: () => {
-        const store = usePermissionStore();
+        const store = useUserStore();
         return store.permission == "Оператор" ? true : "/";
       }
     },
@@ -257,8 +258,21 @@ const router = createRouter({
       meta: {
         breadcrumbs: "Выход"
       }
+    },
+    {
+      path: "/auth",
+      name: "Авторизация",
+      component: () => import("@/views/AuthView.vue"),
+      meta: {
+        breadcrumbs: "Авторизация"
+      }
     }
   ]
+});
+
+router.beforeEach((t, f) => {
+  const store = useUserStore();
+  if (!store.authed && t.name != "Авторизация") return "/auth";
 });
 
 export default router;

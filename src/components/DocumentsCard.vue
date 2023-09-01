@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getOOPDocumentsTypes, getOOPDocumentsUploaded } from "@/core";
-import { usePermissionStore } from "@/stores";
+import { useUserStore } from "@/stores";
 import type { OopFiles, OopFilesTypes } from "@/types/directus";
 import { KDocumentStatusIcon } from "@kosygin-rsu/components";
 import { onMounted, ref } from "vue";
@@ -8,7 +8,7 @@ import { useRoute, useRouter } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
-const store = usePermissionStore();
+const store = useUserStore();
 
 function routing(where: string) {
   let end = "/" + where;

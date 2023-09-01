@@ -4,7 +4,7 @@ import DepLeadHomeCard from "@/components/DepLeadHomeCard.vue";
 import EmployeeCard from "@/components/EmployeeCard.vue";
 import DocumentsCard from "@/components/DocumentsCard.vue";
 import { useRoute, useRouter } from "vue-router";
-import { usePermissionStore } from "@/stores";
+import { useUserStore } from "@/stores";
 import { ref, type HTMLAttributes } from "vue";
 import { getPlanById } from "@/core";
 import { stringFirstToUpper } from "@/utils";
@@ -17,7 +17,7 @@ const route = useRoute();
 const id = route.params.id;
 const data = ref(await getPlanById(typeof id == "string" ? id : undefined));
 
-const store = usePermissionStore();
+const store = useUserStore();
 const router = useRouter();
 
 const pageP = ref(1);

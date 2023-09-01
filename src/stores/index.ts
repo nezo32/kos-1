@@ -1,8 +1,17 @@
-import { ref } from 'vue'
-import { defineStore } from 'pinia'
+import { ref } from "vue";
+import { defineStore } from "pinia";
 
-export const usePermissionStore = defineStore('permissions', () => {
-  const permission = ref('')
+export const useUserStore = defineStore(
+  "permissions",
+  () => {
+    const authed = ref(false);
+    const permission = ref<string>();
 
-  return { permission }
-})
+    const username = ref<string>();
+
+    const meId = ref<string>();
+
+    return { permission, authed, username, meId };
+  },
+  { persist: true }
+);

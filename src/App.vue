@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { KFooter } from '@kosygin-rsu/components'
-import Menu from '@/components/Menu.vue'
-import PageHeader from '@/components/PageHeader.vue'
+import { KFooter } from "@kosygin-rsu/components";
+import Menu from "@/components/Menu.vue";
+import PageHeader from "@/components/PageHeader.vue";
 </script>
 
 <template>
@@ -24,5 +24,5 @@ import PageHeader from '@/components/PageHeader.vue'
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/app.scss';
+@import "@/assets/app.scss";
 </style>
