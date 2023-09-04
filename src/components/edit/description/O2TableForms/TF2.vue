@@ -1,48 +1,43 @@
 <script setup lang="ts">
-import BasicTableForms from '@/components/BasicTableForms.vue'
-import Textarea from '@/components/Textarea.vue'
-import { KForms } from '@kosygin-rsu/components'
-import { v4 as uuidv4 } from 'uuid'
-import { reactive, watch } from 'vue'
+import BasicTableForms from "@/components/BasicTableForms.vue";
+import Textarea from "@/components/Textarea.vue";
+import { KForms } from "@kosygin-rsu/components";
+import { v4 as uuidv4 } from "uuid";
+import { reactive, watch } from "vue";
 
 type DataType = {
-  name: string
-  key: string
+  name: string;
+  key: string;
   data: {
-    type: string
-    key: string
-    code: string
-    text: string
-  }[]
-}
+    type: string;
+    key: string;
+    code: string;
+    text: string;
+  }[];
+};
 
 const getNewGeneral: () => DataType = () => ({
-  name: '',
+  name: "",
   key: uuidv4(),
-  data: reactive([{ key: uuidv4(), type: '', code: '', text: '' }])
-})
-const getNewInner = () => ({ code: '', type: '', text: '', key: uuidv4() })
+  data: reactive([{ key: uuidv4(), type: "", code: "", text: "" }])
+});
+const getNewInner = () => ({ code: "", type: "", text: "", key: uuidv4() });
 
-const data = reactive<DataType[]>([getNewGeneral()])
+const data = reactive<DataType[]>([getNewGeneral()]);
 
 watch(data, () => {
-  console.log('aboba')
   data.forEach((el, ind) => {
     el.data.forEach((e, i) => {
-      if (e.code == '' && e.text == '' && e.type == '' && i != el.data.length - 1) {
-        data[ind].data.splice(i, 1)
+      if (e.code == "" && e.text == "" && e.type == "" && i != el.data.length - 1) {
+        data[ind].data.splice(i, 1);
       }
-    })
+    });
 
-    if (
-      el.name == '' &&
-      ind != data.length - 1 &&
-      el.data.every((e) => e.code == '' && e.text == '' && e.type == '')
-    ) {
-      data.splice(ind, 1)
+    if (el.name == "" && ind != data.length - 1 && el.data.every((e) => e.code == "" && e.text == "" && e.type == "")) {
+      data.splice(ind, 1);
     }
-  })
-})
+  });
+});
 </script>
 
 <template>
@@ -73,8 +68,7 @@ watch(data, () => {
               <div
                 class="tf2__body__data__content__add__text"
                 @click="
-                  data[i].data[data[i].data.length - 1].code &&
-                  data[i].data[data[i].data.length - 1].text
+                  data[i].data[data[i].data.length - 1].code && data[i].data[data[i].data.length - 1].text
                     ? data[i].data.push(getNewInner())
                     : true
                 "
@@ -88,10 +82,7 @@ watch(data, () => {
         </div>
         <div class="tf2__body__add">
           <p></p>
-          <div
-            class="tf2__body__add__text"
-            @click="data[data.length - 1].name ? data.push(getNewGeneral()) : true"
-          >
+          <div class="tf2__body__add__text" @click="data[data.length - 1].name ? data.push(getNewGeneral()) : true">
             <span>+</span>
             Добавить вид профессиональной деятельности
           </div>

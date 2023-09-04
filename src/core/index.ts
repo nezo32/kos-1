@@ -28,6 +28,8 @@ export const db = createDirectus<CustomDirectusTypes>("https://accreditation.rgu
   .with(graphql())
   .with(rest());
 
+await db.login("test@test.com", "test", {});
+
 export const getOopFilesTypesCount = async () =>
   (
     await db.request(

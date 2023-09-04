@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { db } from "@/core";
-import { reactive, ref, onMounted, onUnmounted } from "vue";
+import { reactive, ref, onMounted, onUnmounted, watch } from "vue";
 import DocumentEditBase from "./DocumentEditBase.vue";
 import DescMain from "./description/DescMain.vue";
 import O1 from "./description/O1.vue";
@@ -123,13 +123,13 @@ async function getInitValues() {
       }
     })
   );
+
   //@ts-ignore
   displayData.value = data;
 }
 
 const promise = ref<CancelablePromise<any>>();
-async function setField(data: Field, init: boolean, changeFullValue?: boolean) {
-  if (init) return;
+async function setField(data: Field, changeFullValue?: boolean) {
   if (promise.value) {
     promise.value.cancel();
     promise.value = undefined;
@@ -197,78 +197,7 @@ const client = createClient({
   }
 });
 
-/* const removeHandlers = ref<(() => void)[]>([]);
-const unsub = ref<() => void>(); */
-
-/* async function wsConnect() {
-  const { subscription, unsubscribe } = await db.subscribe("documents_parts", {
-    query: {
-      filter: {
-        //@ts-ignore
-        oop_file: currentFile.value
-      }
-    }
-  });
-  for await (const item of subscription) {
-    //@ts-ignore
-    const ev = item as MessageEventType;
-    console.log("generator", ev);
-    if (ev.event == "update" || ev.event == "create") {
-      //@ts-ignore
-      displayData.value = ev.data;
-    }
-  }
-  unsub.value = unsubscribe;
-}
-function wsDisconnect() {
-  unsub.value?.();
-
-  removeHandlers.value.forEach((el) => el());
-  removeHandlers.value = [];
-}
-function wsHandlers() {
-  removeHandlers.value = [];
-
-  removeHandlers.value.push(db.onWebSocket("open", openHandler));
-  removeHandlers.value.push(db.onWebSocket("message", messageHandler));
-  removeHandlers.value.push(db.onWebSocket("error", errorHandler));
-  removeHandlers.value.push(db.onWebSocket("close", closeHandler));
-} */
-
-/* type MessageEventType = {
-  data: Record<string, any>[];
-  type: string;
-  event: string;
-};
-
-function openHandler(ev: Event) {
-  console.log("open", ev);
-}
-
-function messageHandler(ev: MessageEventType) {
-  console.log("message", ev);
-}
-function errorHandler(ev: Event) {
-  console.log("error", ev);
-}
-function closeHandler(ev: Event) {
-  console.log("close", ev);
-} */
-
 function subscribeGraphQL() {
-  client.on("opened", () => {
-    console.log("ws opened");
-  });
-  client.on("connected", () => {
-    console.log("ws connected");
-  });
-  client.on("connecting", () => {
-    console.log("ws connecting");
-  });
-  client.on("closed", (s) => {
-    console.log("ws closed");
-  });
-
   client.subscribe<{ documents_parts_mutated: Record<string, any> }>(
     {
       query: `
@@ -292,15 +221,15 @@ function subscribeGraphQL() {
         const docParts = data.documents_parts_mutated;
         if (docParts.event == "update" || docParts.event == "create") {
           const docPartsData = Object.assign({}, docParts.data);
-          console.log(docPartsData);
+
           if (docPartsData.oop_file && "id" in docPartsData.oop_file && docPartsData.oop_file.id == currentFile.value) {
             delete docPartsData.oop_file;
+            activeFieldKey.value = docPartsData.key;
             displayData.value = docPartsData;
           }
         }
       },
       error: (err) => {
-        console.log(err);
         client.dispose();
       },
       complete: () => {}
@@ -354,6 +283,8 @@ async function pingIntervalWrapper() {
   }, 1000);
 }
 
+watch(displayData, () => {});
+
 onMounted(async () => {
   await load();
   await getInitValues();
@@ -372,6 +303,7 @@ onUnmounted(async () => {
 
 const booked = ref(false);
 const worker = ref<string>();
+const activeFieldKey = ref<string>();
 </script>
 
 <template>
@@ -384,7 +316,13 @@ const worker = ref<string>();
       :booked="booked"
       :worker="worker"
     >
-      <DescMain v-if="page == 1" @changeField="setField" :data="displayData" :booked="booked" />
+      <DescMain
+        v-if="page == 1"
+        @changeField="setField"
+        :data="displayData"
+        :active-field="activeFieldKey"
+        :booked="booked"
+      />
       <O1 v-if="page == 2" @changeField="setField" :booked="booked" />
       <O2 v-if="page == 3" @changeField="setField" :booked="booked" />
       <O3 v-if="page == 4" @changeField="setField" :booked="booked" />
