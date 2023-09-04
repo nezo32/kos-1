@@ -198,6 +198,8 @@ const client = createClient({
 });
 
 function subscribeGraphQL() {
+  client.on("connected", () => console.log("connected"));
+  client.on("closed", () => console.log("closed"));
   client.subscribe<{ documents_parts_mutated: Record<string, any> }>(
     {
       query: `
@@ -221,8 +223,9 @@ function subscribeGraphQL() {
         const docParts = data.documents_parts_mutated;
         if (docParts.event == "update" || docParts.event == "create") {
           const docPartsData = Object.assign({}, docParts.data);
-
           if (docPartsData.oop_file && "id" in docPartsData.oop_file && docPartsData.oop_file.id == currentFile.value) {
+            console.log("WS DATA UPDATE");
+
             delete docPartsData.oop_file;
             activeFieldKey.value = docPartsData.key;
             displayData.value = docPartsData;
@@ -283,7 +286,9 @@ async function pingIntervalWrapper() {
   }, 1000);
 }
 
-watch(displayData, () => {});
+watch(page, async () => {
+  await getInitValues();
+});
 
 onMounted(async () => {
   await load();
@@ -323,7 +328,13 @@ const activeFieldKey = ref<string>();
         :active-field="activeFieldKey"
         :booked="booked"
       />
-      <O1 v-if="page == 2" @changeField="setField" :booked="booked" />
+      <O1
+        v-if="page == 2"
+        @changeField="setField"
+        :data="displayData"
+        :active-field="activeFieldKey"
+        :booked="booked"
+      />
       <O2 v-if="page == 3" @changeField="setField" :booked="booked" />
       <O3 v-if="page == 4" @changeField="setField" :booked="booked" />
       <O4 v-if="page == 5" @changeField="setField" :booked="booked" />

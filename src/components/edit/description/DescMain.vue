@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import type { DocumentsParts } from "@/types/directus";
 import { KForms } from "@kosygin-rsu/components";
-import {
-  ref,
-  watch,
-  type Ref,
-  onMounted,
-  onBeforeUpdate,
-  reactive,
-  onUpdated,
-  nextTick,
-  type WatchStopHandle,
-  toRefs
-} from "vue";
+import { ref, watch, type Ref, reactive, type WatchStopHandle } from "vue";
 import debounce from "lodash.debounce";
 import { v4 as uuidv4 } from "uuid";
 
@@ -79,28 +68,28 @@ function setAllWatchers() {
   return watchStopHandlers;
 }
 
-const a = createRef("institution_name");
-const b = createRef("approved_by");
-const c = createRef("date_of_approval");
-const d = createRef("level_of_edu");
-const e = createRef("code_of_train_dir");
-const f = createRef("field_of_study");
-const g = createRef("profile");
-const h = createRef("form_of_edu");
-const i = createRef("fgos_date");
-const j = createRef("fgos_order");
-const k = createRef("approved_academ_council_date");
-const l = createRef("approved_academ_council_order");
-const aa = createRef("reviewed_approved_department_meet_by");
-const ab = createRef("department_meet_date");
-const ac = createRef("department_meet_order");
-const ad = createRef("head_edu_program");
-const ae = createRef("head_department");
-const da = createRef("approved_by_head_department_edu_progs_projs");
-const db = createRef("agreed_by_institute_director");
+const a = createRef("main_institution_name");
+const b = createRef("main_approved_by");
+const c = createRef("main_date_of_approval");
+const d = createRef("main_level_of_edu");
+const e = createRef("main_code_of_train_dir");
+const f = createRef("main_field_of_study");
+const g = createRef("main_profile");
+const h = createRef("main_form_of_edu");
+const i = createRef("main_fgos_date");
+const j = createRef("main_fgos_order");
+const k = createRef("main_approved_academ_council_date");
+const l = createRef("main_approved_academ_council_order");
+const aa = createRef("main_reviewed_approved_department_meet_by");
+const ab = createRef("main_department_meet_date");
+const ac = createRef("main_department_meet_order");
+const ad = createRef("main_head_edu_program");
+const ae = createRef("main_head_department");
+const da = createRef("main_approved_by_head_department_edu_progs_projs");
+const db = createRef("main_agreed_by_institute_director");
 
 const eduProgram = reactive<{ key: string; value: { org: string; reviewer: string; date: string; key?: string }[] }>({
-  key: "edu_program_org",
+  key: "main_edu_program_org",
   value: [
     {
       org: "",
@@ -324,7 +313,7 @@ watch(
     <section>
       <article v-for="(v, i) of eduProgram.value" :key="v.key">
         <KForms
-          :on-work="'edu_program_org' == activeField"
+          :on-work="'main_edu_program_org' == activeField"
           :disabled="booked"
           v-model="v.org"
           type="input"
@@ -333,7 +322,7 @@ watch(
         />
         <div class="desc-main__inner">
           <KForms
-            :on-work="'edu_program_org' == activeField"
+            :on-work="'main_edu_program_org' == activeField"
             :disabled="booked"
             v-model="v.reviewer"
             type="dropdown"
@@ -341,7 +330,7 @@ watch(
             header="Рецензент"
           />
           <KForms
-            :on-work="'edu_program_org' == activeField"
+            :on-work="'main_edu_program_org' == activeField"
             :disabled="booked"
             v-model="v.date"
             type="date"
